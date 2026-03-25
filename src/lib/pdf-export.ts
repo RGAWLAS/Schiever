@@ -74,7 +74,7 @@ function addOverviewSection(doc: JsPDFWithAutoTable): void {
   const totalFollowers = fb[fb.length - 1].followers + ig[ig.length - 1].followers + tk[tk.length - 1].followers;
   const paidLatest = paid.monthly[paid.monthly.length - 1];
   const latestFlyer = flyers.flyers[flyers.flyers.length - 1];
-  const kpiMet = kpis.kpis.filter(k => (k.current / k.target) >= 0.9).length;
+  const totalKpis = kpis.categories.reduce((s, c) => s + c.kpis.length, 0);
 
   const kpiCards = [
     ['Obserwujący (łącznie)', formatNumber(totalFollowers)],
@@ -84,7 +84,7 @@ function addOverviewSection(doc: JsPDFWithAutoTable): void {
     ['Retencja', formatPercent(paidLatest.retention_rate)],
     ['CTR Gazetki', formatPercent(latestFlyer.ctr)],
     ['ROAS', `${(paidLatest.revenue / paidLatest.ad_spend).toFixed(1)}x`],
-    ['KPI zrealizowane', `${kpiMet}/${kpis.kpis.length}`],
+    ['Łącznie KPI', `${totalKpis}`],
   ];
 
   let y = 50;
@@ -377,6 +377,39 @@ function addInvoicingSection(doc: JsPDFWithAutoTable): void {
   });
 }
 
+// ---- KPI helper to get actual values ----
+function getKpiActual(
+  categoryId: string, metric: string, month: string,
+): number | null {
+  if (categoryId === 'ecommerce') {
+    const entry = getPaidMediaData().monthly.find(m => m.month === month);
+    if (!entry) return null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (entry as any)[metric] as number ?? null;
+  }
+  const platformMap: Record<string, 'facebook' | 'instagram' | 'tiktok'> = {
+    'social-facebook': 'facebook', 'social-instagram': 'instagram', 'social-tiktok': 'tiktok',
+  };
+  if (platformMap[categoryId]) {
+    const entry = getSocialMediaData().platforms[platformMap[categoryId]].monthly.find(m => m.month === month);
+    if (!entry) return null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (entry as any)[metric] as number ?? null;
+  }
+  if (categoryId === 'flyers') {
+    const entry = getFlyersData().flyers.find(f => f.month === month);
+    if (!entry) return null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (entry as any)[metric] as number ?? null;
+  }
+  return null;
+}
+
+function formatKpiVal(value: number, format: string, unit: string): string {
+  if (format === 'percent') return `${value.toFixed(1)}${unit}`;
+  return formatNumber(value);
+}
+
 // ---- KPI SECTION ----
 function addKpiSection(doc: JsPDFWithAutoTable): void {
   doc.addPage();
@@ -384,81 +417,56 @@ function addKpiSection(doc: JsPDFWithAutoTable): void {
   addPageHeader(doc, 'Realizacja KPI', 'Cele i postęp realizacji kluczowych wskaźników');
 
   let y = 50;
-  y = addSectionTitle(doc, y, 'Podsumowanie KPI');
 
-  const kpiRows = data.kpis.map(kpi => {
-    const ratio = kpi.current / kpi.target;
-    const status = ratio >= 0.9 ? 'Na dobrej drodze' : ratio >= 0.7 ? 'Wymaga uwagi' : 'Zagrożony';
-    return [
-      kpi.name,
-      kpi.category,
-      `${kpi.target}${kpi.unit}`,
-      `${kpi.current}${kpi.unit}`,
-      `${(ratio * 100).toFixed(0)}%`,
-      status,
-    ];
-  });
-
-  autoTable(doc, {
-    startY: y,
-    head: [['KPI', 'Kategoria', 'Cel', 'Realizacja', '%', 'Status']],
-    body: kpiRows,
-    theme: 'grid',
-    headStyles: { fillColor: [...PRIMARY], fontSize: 8, fontStyle: 'bold' },
-    bodyStyles: { fontSize: 8 },
-    columnStyles: {
-      2: { halign: 'right' }, 3: { halign: 'right' }, 4: { halign: 'right' },
-    },
-    margin: { left: 14, right: 14 },
-    didParseCell: (data) => {
-      if (data.section === 'body' && data.column.index === 5) {
-        const val = data.cell.raw as string;
-        if (val === 'Na dobrej drodze') {
-          data.cell.styles.textColor = [5, 150, 105];
-          data.cell.styles.fontStyle = 'bold';
-        } else if (val === 'Wymaga uwagi') {
-          data.cell.styles.textColor = [245, 158, 11];
-          data.cell.styles.fontStyle = 'bold';
-        } else {
-          data.cell.styles.textColor = [220, 38, 38];
-          data.cell.styles.fontStyle = 'bold';
-        }
-      }
-    },
-  });
-
-  y = (doc.lastAutoTable?.finalY ?? y) + 14;
-
-  // Monthly trend for each KPI
-  for (const kpi of data.kpis) {
+  for (const category of data.categories) {
     y = checkPageBreak(doc, y, 50);
-    y = addSectionTitle(doc, y, `${kpi.name} (${kpi.period})`);
+    y = addSectionTitle(doc, y, category.name);
 
-    const trendRows = kpi.monthly.map(m => [
-      formatMonthFull(m.month),
-      `${m.target}${kpi.unit}`,
-      `${m.actual}${kpi.unit}`,
-      m.actual >= m.target ? 'Osiągnięty' : 'Poniżej celu',
-    ]);
+    const rows = category.kpis.map(kpi => {
+      const months = Object.keys(kpi.targets).sort();
+      const latestMonth = months[months.length - 1];
+      const target = kpi.targets[latestMonth];
+      const actual = getKpiActual(category.id, kpi.metric, latestMonth);
+      const ratio = actual !== null ? actual / target : 0;
+      const status = ratio >= 1.0 ? 'Zrealizowany' : ratio >= 0.9 ? 'Na dobrej drodze' : ratio >= 0.7 ? 'Wymaga uwagi' : 'Zagrożony';
+      return [
+        kpi.name,
+        formatKpiVal(target, kpi.format, kpi.unit),
+        actual !== null ? formatKpiVal(actual, kpi.format, kpi.unit) : '—',
+        `${Math.round(ratio * 100)}%`,
+        status,
+      ];
+    });
 
     autoTable(doc, {
       startY: y,
-      head: [['Miesiąc', 'Cel', 'Realizacja', 'Status']],
-      body: trendRows,
-      theme: 'striped',
-      headStyles: { fillColor: [148, 163, 184], fontSize: 7, fontStyle: 'bold' },
-      bodyStyles: { fontSize: 7 },
-      columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' } },
+      head: [['KPI', 'Cel', 'Realizacja', '%', 'Status']],
+      body: rows,
+      theme: 'grid',
+      headStyles: { fillColor: [...PRIMARY], fontSize: 8, fontStyle: 'bold' },
+      bodyStyles: { fontSize: 8 },
+      columnStyles: {
+        1: { halign: 'right' }, 2: { halign: 'right' }, 3: { halign: 'right' },
+      },
       margin: { left: 14, right: 14 },
-      didParseCell: (data) => {
-        if (data.section === 'body' && data.column.index === 3) {
-          const val = data.cell.raw as string;
-          data.cell.styles.textColor = val === 'Osiągnięty' ? [5, 150, 105] : [220, 38, 38];
+      didParseCell: (cellData) => {
+        if (cellData.section === 'body' && cellData.column.index === 4) {
+          const val = cellData.cell.raw as string;
+          if (val === 'Zrealizowany' || val === 'Na dobrej drodze') {
+            cellData.cell.styles.textColor = [5, 150, 105];
+            cellData.cell.styles.fontStyle = 'bold';
+          } else if (val === 'Wymaga uwagi') {
+            cellData.cell.styles.textColor = [245, 158, 11];
+            cellData.cell.styles.fontStyle = 'bold';
+          } else {
+            cellData.cell.styles.textColor = [220, 38, 38];
+            cellData.cell.styles.fontStyle = 'bold';
+          }
         }
       },
     });
 
-    y = (doc.lastAutoTable?.finalY ?? y) + 10;
+    y = (doc.lastAutoTable?.finalY ?? y) + 12;
   }
 }
 

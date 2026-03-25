@@ -48,7 +48,7 @@ export default function OverviewPanel() {
   const latestFlyer = flyers.flyers[flyers.flyers.length - 1];
   const prevFlyer = flyers.flyers[flyers.flyers.length - 2];
 
-  const kpiMet = kpis.kpis.filter(k => (k.current / k.target) >= 0.9).length;
+  const totalKpis = kpis.categories.reduce((s, c) => s + c.kpis.length, 0);
 
   const chartData = paid.monthly.map((m) => ({
     month: formatMonth(m.month),
@@ -117,10 +117,10 @@ export default function OverviewPanel() {
         />
         <KpiCard
           title="KPI zrealizowane"
-          value={`${kpiMet}/${kpis.kpis.length}`}
-          change={`${Math.round(kpiMet / kpis.kpis.length * 100)}% celów`}
+          value={`${totalKpis} KPI`}
+          change="szczegóły w zakładce KPI"
           icon={TrendingUp}
-          positive={kpiMet / kpis.kpis.length >= 0.7}
+          positive={true}
         />
       </div>
 

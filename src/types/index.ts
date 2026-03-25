@@ -72,23 +72,22 @@ export interface InvoicingData {
   invoices: Invoice[];
 }
 
-export interface KpiMonthly {
-  month: string;
-  target: number;
-  actual: number;
-}
-
-export interface KPI {
+export interface KpiMetric {
   id: string;
   name: string;
-  category: string;
-  target: number;
-  current: number;
+  metric: string;
   unit: string;
-  period: string;
-  monthly: KpiMonthly[];
+  format: 'number' | 'percent';
+  targets: Record<string, number>;
+}
+
+export interface KpiCategory {
+  id: string;
+  name: string;
+  icon: string;
+  kpis: KpiMetric[];
 }
 
 export interface KpiData {
-  kpis: KPI[];
+  categories: KpiCategory[];
 }
