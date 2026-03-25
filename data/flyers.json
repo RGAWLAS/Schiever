@@ -1,0 +1,19 @@
+{
+  "flyers": [
+    { "id": "flyer-2025-01", "month": "2025-01", "title": "Styczniowa Promocja", "volume": 245000, "ctr": 2.8, "pages": 24, "products_featured": 180 },
+    { "id": "flyer-2025-02", "month": "2025-02", "title": "Walentynkowe Okazje", "volume": 250000, "ctr": 3.1, "pages": 28, "products_featured": 210 },
+    { "id": "flyer-2025-03", "month": "2025-03", "title": "Wiosenne Promocje", "volume": 260000, "ctr": 3.4, "pages": 32, "products_featured": 240 },
+    { "id": "flyer-2025-04", "month": "2025-04", "title": "Wielkanocna Gazetka", "volume": 270000, "ctr": 3.6, "pages": 36, "products_featured": 260 },
+    { "id": "flyer-2025-05", "month": "2025-05", "title": "Majowe Obniżki", "volume": 255000, "ctr": 3.2, "pages": 28, "products_featured": 220 },
+    { "id": "flyer-2025-06", "month": "2025-06", "title": "Letnia Wyprzedaż", "volume": 265000, "ctr": 3.5, "pages": 32, "products_featured": 245 },
+    { "id": "flyer-2025-07", "month": "2025-07", "title": "Wakacyjne Promocje", "volume": 240000, "ctr": 2.9, "pages": 24, "products_featured": 185 },
+    { "id": "flyer-2025-08", "month": "2025-08", "title": "Back to School", "volume": 258000, "ctr": 3.3, "pages": 28, "products_featured": 215 },
+    { "id": "flyer-2025-09", "month": "2025-09", "title": "Jesienna Oferta", "volume": 268000, "ctr": 3.5, "pages": 32, "products_featured": 250 },
+    { "id": "flyer-2025-10", "month": "2025-10", "title": "Październikowe Hity", "volume": 275000, "ctr": 3.7, "pages": 36, "products_featured": 270 },
+    { "id": "flyer-2025-11", "month": "2025-11", "title": "Black Friday", "volume": 310000, "ctr": 4.2, "pages": 48, "products_featured": 350 },
+    { "id": "flyer-2025-12", "month": "2025-12", "title": "Świąteczna Gazetka", "volume": 320000, "ctr": 4.5, "pages": 52, "products_featured": 380 },
+    { "id": "flyer-2026-01", "month": "2026-01", "title": "Noworoczne Promocje", "volume": 250000, "ctr": 3.0, "pages": 28, "products_featured": 200 },
+    { "id": "flyer-2026-02", "month": "2026-02", "title": "Zimowe Okazje", "volume": 255000, "ctr": 3.2, "pages": 28, "products_featured": 210 },
+    { "id": "flyer-2026-03", "month": "2026-03", "title": "Wiosna 2026", "volume": 265000, "ctr": 3.4, "pages": 32, "products_featured": 235 }
+  ]
+}
