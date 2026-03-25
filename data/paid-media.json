@@ -1,0 +1,19 @@
+{
+  "monthly": [
+    { "month": "2025-01", "traffic": 145000, "conversion_rate": 2.1, "orders": 3045, "retention_rate": 32.5, "ad_spend": 42000, "revenue": 485000 },
+    { "month": "2025-02", "traffic": 152000, "conversion_rate": 2.3, "orders": 3496, "retention_rate": 33.1, "ad_spend": 45000, "revenue": 520000 },
+    { "month": "2025-03", "traffic": 168000, "conversion_rate": 2.5, "orders": 4200, "retention_rate": 34.2, "ad_spend": 48000, "revenue": 610000 },
+    { "month": "2025-04", "traffic": 155000, "conversion_rate": 2.2, "orders": 3410, "retention_rate": 33.8, "ad_spend": 44000, "revenue": 530000 },
+    { "month": "2025-05", "traffic": 172000, "conversion_rate": 2.6, "orders": 4472, "retention_rate": 35.0, "ad_spend": 50000, "revenue": 650000 },
+    { "month": "2025-06", "traffic": 165000, "conversion_rate": 2.4, "orders": 3960, "retention_rate": 34.5, "ad_spend": 47000, "revenue": 590000 },
+    { "month": "2025-07", "traffic": 148000, "conversion_rate": 2.1, "orders": 3108, "retention_rate": 33.0, "ad_spend": 40000, "revenue": 470000 },
+    { "month": "2025-08", "traffic": 142000, "conversion_rate": 2.0, "orders": 2840, "retention_rate": 32.2, "ad_spend": 38000, "revenue": 440000 },
+    { "month": "2025-09", "traffic": 175000, "conversion_rate": 2.7, "orders": 4725, "retention_rate": 35.5, "ad_spend": 52000, "revenue": 680000 },
+    { "month": "2025-10", "traffic": 192000, "conversion_rate": 2.9, "orders": 5568, "retention_rate": 36.8, "ad_spend": 58000, "revenue": 780000 },
+    { "month": "2025-11", "traffic": 215000, "conversion_rate": 3.2, "orders": 6880, "retention_rate": 38.2, "ad_spend": 68000, "revenue": 950000 },
+    { "month": "2025-12", "traffic": 235000, "conversion_rate": 3.5, "orders": 8225, "retention_rate": 39.5, "ad_spend": 75000, "revenue": 1120000 },
+    { "month": "2026-01", "traffic": 178000, "conversion_rate": 2.8, "orders": 4984, "retention_rate": 36.0, "ad_spend": 55000, "revenue": 720000 },
+    { "month": "2026-02", "traffic": 185000, "conversion_rate": 2.9, "orders": 5365, "retention_rate": 36.5, "ad_spend": 57000, "revenue": 760000 },
+    { "month": "2026-03", "traffic": 195000, "conversion_rate": 3.0, "orders": 5850, "retention_rate": 37.2, "ad_spend": 60000, "revenue": 820000 }
+  ]
+}
