@@ -6,6 +6,7 @@ import { formatCurrency, formatMonth, formatMonthFull } from '@/lib/formatters';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
+import PdfExportButton from '@/components/ui/pdf-export-button';
 
 const categoryColors: Record<string, string> = {
   social: '#1877F2',
@@ -46,6 +47,12 @@ export default function InvoicingPanel() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">Fakturowanie</h2>
+        <PdfExportButton section="invoicing" size="sm" />
+      </div>
+
       {/* Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white rounded-xl border border-border p-5 shadow-sm">

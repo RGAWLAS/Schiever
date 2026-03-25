@@ -1,5 +1,7 @@
 'use client';
 
+import { PdfExportMenu } from '@/components/ui/pdf-export-button';
+
 export default function Header() {
   return (
     <header className="bg-white border-b border-border px-6 py-4 no-print">
@@ -13,8 +15,11 @@ export default function Header() {
             <p className="text-xs text-muted">Marketing Dashboard</p>
           </div>
         </div>
-        <div className="text-sm text-muted">
-          Raport: Styczeń 2025 &ndash; Marzec 2026
+        <div className="flex items-center gap-4">
+          <div className="text-sm text-muted hidden sm:block">
+            Raport: Styczeń 2025 &ndash; Marzec 2026
+          </div>
+          <PdfExportMenu />
         </div>
       </div>
     </header>

@@ -9,6 +9,7 @@ import {
 } from 'recharts';
 import { X, FileText, Eye, MousePointerClick, BookOpen, Package } from 'lucide-react';
 import type { Flyer } from '@/types';
+import PdfExportButton from '@/components/ui/pdf-export-button';
 
 export default function FlyersPanel() {
   const data = getFlyersData();
@@ -23,6 +24,12 @@ export default function FlyersPanel() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">Gazetki Promocyjne</h2>
+        <PdfExportButton section="flyers" size="sm" />
+      </div>
+
       {/* Metrics chart */}
       <div className="bg-white rounded-xl border border-border p-6 shadow-sm">
         <h3 className="text-lg font-semibold mb-4">Nakład i CTR gazetek</h3>

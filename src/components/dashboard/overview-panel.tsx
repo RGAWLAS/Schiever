@@ -6,6 +6,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 import { Users, Eye, ShoppingCart, TrendingUp, Percent, Newspaper, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import PdfExportButton from '@/components/ui/pdf-export-button';
 
 function KpiCard({ title, value, change, icon: Icon, positive }: {
   title: string; value: string; change: string; icon: React.ElementType; positive: boolean;
@@ -57,6 +58,13 @@ export default function OverviewPanel() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">Podsumowanie</h2>
+        <div className="flex gap-2">
+          <PdfExportButton section="overview" label="Pobierz podsumowanie" variant="outline" size="sm" />
+          <PdfExportButton section="all" label="Pełny raport PDF" size="sm" />
+        </div>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard
           title="Obserwujący (łącznie)"

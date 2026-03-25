@@ -9,6 +9,7 @@ import {
   Newspaper,
   Receipt,
   Target,
+  ImageIcon,
 } from 'lucide-react';
 
 const tabs: { id: TabId; label: string; icon: React.ElementType }[] = [
@@ -18,6 +19,7 @@ const tabs: { id: TabId; label: string; icon: React.ElementType }[] = [
   { id: 'flyers', label: 'Gazetki', icon: Newspaper },
   { id: 'invoicing', label: 'Fakturowanie', icon: Receipt },
   { id: 'kpi', label: 'Realizacja KPI', icon: Target },
+  { id: 'photos', label: 'Zdjęcia', icon: ImageIcon },
 ];
 
 interface TabNavigationProps {

@@ -6,6 +6,7 @@ import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
+import PdfExportButton from '@/components/ui/pdf-export-button';
 
 export default function PaidMediaPanel() {
   const data = getPaidMediaData();
@@ -26,6 +27,12 @@ export default function PaidMediaPanel() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">E-commerce / Paid Media</h2>
+        <PdfExportButton section="paid-media" size="sm" />
+      </div>
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
