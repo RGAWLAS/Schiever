@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useMemo } from 'react';
 import { getPaidMediaData } from '@/lib/data';
 import { formatNumber, formatCurrency, formatPercent, formatMonth } from '@/lib/formatters';
 import {
@@ -7,11 +8,16 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 import PdfExportButton from '@/components/ui/pdf-export-button';
+import TimeRangeFilter, { filterByTimeRange, type TimeRangeValue } from '@/components/ui/time-range-filter';
 
 export default function PaidMediaPanel() {
   const data = getPaidMediaData();
+  const [timeRange, setTimeRange] = useState<TimeRangeValue>({ type: 'all' });
 
-  const chartData = data.monthly.map(m => ({
+  const allMonths = data.monthly.map(m => m.month);
+  const filtered = useMemo(() => filterByTimeRange(data.monthly, timeRange), [data.monthly, timeRange]);
+
+  const chartData = filtered.map(m => ({
     month: formatMonth(m.month),
     traffic: m.traffic,
     orders: m.orders,
@@ -22,8 +28,8 @@ export default function PaidMediaPanel() {
     roas: parseFloat((m.revenue / m.ad_spend).toFixed(1)),
   }));
 
-  const latest = data.monthly[data.monthly.length - 1];
-  const prev = data.monthly[data.monthly.length - 2];
+  const latest = filtered.length > 0 ? filtered[filtered.length - 1] : null;
+  const prev = filtered.length > 1 ? filtered[filtered.length - 2] : null;
 
   return (
     <div className="space-y-6">
@@ -33,18 +39,39 @@ export default function PaidMediaPanel() {
         <PdfExportButton section="paid-media" size="sm" />
       </div>
 
+      {/* Time Range Filter */}
+      <TimeRangeFilter value={timeRange} onChange={setTimeRange} availableMonths={allMonths} />
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Traffic', value: formatNumber(latest.traffic), change: ((latest.traffic - prev.traffic) / prev.traffic * 100).toFixed(1) },
-          { label: 'Konwersja (CR)', value: formatPercent(latest.conversion_rate), change: (latest.conversion_rate - prev.conversion_rate).toFixed(1) + 'pp' },
-          { label: 'Zamówienia', value: formatNumber(latest.orders), change: ((latest.orders - prev.orders) / prev.orders * 100).toFixed(1) },
-          { label: 'Retencja', value: formatPercent(latest.retention_rate), change: (latest.retention_rate - prev.retention_rate).toFixed(1) + 'pp' },
+          {
+            label: 'Traffic',
+            value: latest ? formatNumber(latest.traffic) : '\u2014',
+            change: latest && prev ? ((latest.traffic - prev.traffic) / prev.traffic * 100).toFixed(1) : null,
+          },
+          {
+            label: 'Konwersja (CR)',
+            value: latest ? formatPercent(latest.conversion_rate) : '\u2014',
+            change: latest && prev ? (latest.conversion_rate - prev.conversion_rate).toFixed(1) + 'pp' : null,
+          },
+          {
+            label: 'Zamówienia',
+            value: latest ? formatNumber(latest.orders) : '\u2014',
+            change: latest && prev ? ((latest.orders - prev.orders) / prev.orders * 100).toFixed(1) : null,
+          },
+          {
+            label: 'Retencja',
+            value: latest ? formatPercent(latest.retention_rate) : '\u2014',
+            change: latest && prev ? (latest.retention_rate - prev.retention_rate).toFixed(1) + 'pp' : null,
+          },
         ].map((card) => (
           <div key={card.label} className="bg-white rounded-xl border border-border p-5 shadow-sm">
             <div className="text-sm text-muted mb-1">{card.label}</div>
             <div className="text-2xl font-bold">{card.value}</div>
-            <div className="text-sm text-accent mt-1">+{card.change} vs. poprzedni</div>
+            <div className="text-sm text-accent mt-1">
+              {card.change !== null ? `+${card.change} vs. poprzedni` : '\u2014'}
+            </div>
           </div>
         ))}
       </div>
@@ -142,7 +169,7 @@ export default function PaidMediaPanel() {
             </tr>
           </thead>
           <tbody>
-            {data.monthly.map((m) => (
+            {filtered.map((m) => (
               <tr key={m.month} className="border-b border-gray-50 hover:bg-gray-50">
                 <td className="py-2 px-3">{formatMonth(m.month)}</td>
                 <td className="py-2 px-3 text-right">{formatNumber(m.traffic)}</td>

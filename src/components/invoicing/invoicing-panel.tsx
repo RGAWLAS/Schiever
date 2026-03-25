@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { getInvoicingData } from '@/lib/data';
 import { formatCurrency, formatMonth, formatMonthFull } from '@/lib/formatters';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 import PdfExportButton from '@/components/ui/pdf-export-button';
+import TimeRangeFilter, { filterByTimeRange, type TimeRangeValue } from '@/components/ui/time-range-filter';
 
 const categoryColors: Record<string, string> = {
   social: '#1877F2',
@@ -27,8 +28,16 @@ const categoryLabels: Record<string, string> = {
 export default function InvoicingPanel() {
   const data = getInvoicingData();
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+  const [timeRange, setTimeRange] = useState<TimeRangeValue>({ type: 'all' });
 
-  const chartData = data.invoices.map(inv => {
+  const allMonths = data.invoices.map(inv => inv.month);
+
+  const filtered = useMemo(() => {
+    const withMonth = data.invoices.map(inv => ({ ...inv, month: inv.month }));
+    return filterByTimeRange(withMonth, timeRange);
+  }, [data, timeRange]);
+
+  const chartData = filtered.map(inv => {
     const row: Record<string, string | number> = { month: formatMonth(inv.month) };
     inv.line_items.forEach(item => {
       row[categoryLabels[item.category] || item.category] = item.amount;
@@ -37,12 +46,12 @@ export default function InvoicingPanel() {
     return row;
   });
 
-  const totalSpent = data.invoices.reduce((sum, inv) => sum + inv.total, 0);
-  const avgMonthly = totalSpent / data.invoices.length;
-  const latestInvoice = data.invoices[data.invoices.length - 1];
+  const totalSpent = filtered.reduce((sum, inv) => sum + inv.total, 0);
+  const avgMonthly = filtered.length > 0 ? totalSpent / filtered.length : 0;
+  const latestInvoice = filtered.length > 0 ? filtered[filtered.length - 1] : null;
 
   const selected = selectedMonth
-    ? data.invoices.find(i => i.month === selectedMonth)
+    ? filtered.find(i => i.month === selectedMonth)
     : latestInvoice;
 
   return (
@@ -53,12 +62,15 @@ export default function InvoicingPanel() {
         <PdfExportButton section="invoicing" size="sm" />
       </div>
 
+      {/* Time Range Filter */}
+      <TimeRangeFilter value={timeRange} onChange={setTimeRange} availableMonths={allMonths} />
+
       {/* Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white rounded-xl border border-border p-5 shadow-sm">
           <div className="text-sm text-muted mb-1">Łączne wydatki</div>
           <div className="text-2xl font-bold">{formatCurrency(totalSpent)}</div>
-          <div className="text-xs text-muted mt-1">{data.invoices.length} miesięcy</div>
+          <div className="text-xs text-muted mt-1">{filtered.length} miesięcy</div>
         </div>
         <div className="bg-white rounded-xl border border-border p-5 shadow-sm">
           <div className="text-sm text-muted mb-1">Średnia miesięczna</div>
@@ -66,13 +78,23 @@ export default function InvoicingPanel() {
         </div>
         <div className="bg-white rounded-xl border border-border p-5 shadow-sm">
           <div className="text-sm text-muted mb-1">Bieżący miesiąc</div>
-          <div className="text-2xl font-bold">{formatCurrency(latestInvoice.total)}</div>
-          <div className={`text-xs mt-1 ${latestInvoice.status === 'paid' ? 'text-accent' : 'text-warning'}`}>
-            {latestInvoice.status === 'paid' ? 'Opłacona' : 'Oczekująca'}
-          </div>
+          <div className="text-2xl font-bold">{latestInvoice ? formatCurrency(latestInvoice.total) : '—'}</div>
+          {latestInvoice && (
+            <div className={`text-xs mt-1 ${latestInvoice.status === 'paid' ? 'text-accent' : 'text-warning'}`}>
+              {latestInvoice.status === 'paid' ? 'Opłacona' : 'Oczekująca'}
+            </div>
+          )}
         </div>
       </div>
 
+      {filtered.length === 0 && (
+        <div className="bg-white rounded-xl border border-border p-8 shadow-sm text-center text-muted">
+          Brak faktur w wybranym zakresie czasowym.
+        </div>
+      )}
+
+      {filtered.length > 0 && (
+      <>
       {/* Stacked bar chart */}
       <div className="bg-white rounded-xl border border-border p-6 shadow-sm">
         <h3 className="text-lg font-semibold mb-4">Struktura kosztów miesięcznych</h3>
@@ -95,11 +117,11 @@ export default function InvoicingPanel() {
         <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
           <h3 className="text-lg font-semibold">Szczegóły faktury</h3>
           <select
-            value={selectedMonth || latestInvoice.month}
+            value={selectedMonth || (latestInvoice ? latestInvoice.month : '')}
             onChange={e => setSelectedMonth(e.target.value)}
             className="px-3 py-2 border border-border rounded-lg text-sm"
           >
-            {data.invoices.map(inv => (
+            {filtered.map(inv => (
               <option key={inv.month} value={inv.month}>
                 {formatMonthFull(inv.month)}
               </option>
@@ -169,7 +191,7 @@ export default function InvoicingPanel() {
             </tr>
           </thead>
           <tbody>
-            {data.invoices.map(inv => {
+            {filtered.map(inv => {
               const byCategory: Record<string, number> = {};
               inv.line_items.forEach(item => { byCategory[item.category] = item.amount; });
               return (
@@ -194,6 +216,8 @@ export default function InvoicingPanel() {
           </tbody>
         </table>
       </div>
+      </>
+      )}
     </div>
   );
 }

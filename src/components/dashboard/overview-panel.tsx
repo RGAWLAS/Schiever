@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useMemo } from 'react';
 import { getSocialMediaData, getPaidMediaData, getFlyersData, getKpiData } from '@/lib/data';
 import { formatNumber, formatCurrency, formatPercent, formatMonth } from '@/lib/formatters';
 import {
@@ -7,6 +8,7 @@ import {
 } from 'recharts';
 import { Users, Eye, ShoppingCart, TrendingUp, Percent, Newspaper, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import PdfExportButton from '@/components/ui/pdf-export-button';
+import TimeRangeFilter, { filterByTimeRange, type TimeRangeValue } from '@/components/ui/time-range-filter';
 
 function KpiCard({ title, value, change, icon: Icon, positive }: {
   title: string; value: string; change: string; icon: React.ElementType; positive: boolean;
@@ -22,7 +24,7 @@ function KpiCard({ title, value, change, icon: Icon, positive }: {
       <div className="text-2xl font-bold text-foreground">{value}</div>
       <div className={`flex items-center gap-1 mt-1 text-sm ${positive ? 'text-accent' : 'text-danger'}`}>
         {positive ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-        {change} vs. poprzedni miesiąc
+        {change} vs. poprzedni okres
       </div>
     </div>
   );
@@ -34,37 +36,50 @@ export default function OverviewPanel() {
   const flyers = getFlyersData();
   const kpis = getKpiData();
 
-  const fbLatest = social.platforms.facebook.monthly;
-  const igLatest = social.platforms.instagram.monthly;
-  const tkLatest = social.platforms.tiktok.monthly;
+  const allMonths = paid.monthly.map(m => m.month);
+  const [timeRange, setTimeRange] = useState<TimeRangeValue>({ type: 'all' });
 
-  const totalFollowers = fbLatest[fbLatest.length - 1].followers + igLatest[igLatest.length - 1].followers + tkLatest[tkLatest.length - 1].followers;
-  const prevFollowers = fbLatest[fbLatest.length - 2].followers + igLatest[igLatest.length - 2].followers + tkLatest[tkLatest.length - 2].followers;
-  const followersChange = ((totalFollowers - prevFollowers) / prevFollowers * 100).toFixed(1);
+  const filteredPaid = useMemo(() => filterByTimeRange(paid.monthly, timeRange), [paid.monthly, timeRange]);
+  const filteredFb = useMemo(() => filterByTimeRange(social.platforms.facebook.monthly, timeRange), [social, timeRange]);
+  const filteredIg = useMemo(() => filterByTimeRange(social.platforms.instagram.monthly, timeRange), [social, timeRange]);
+  const filteredTk = useMemo(() => filterByTimeRange(social.platforms.tiktok.monthly, timeRange), [social, timeRange]);
 
-  const paidLatest = paid.monthly[paid.monthly.length - 1];
-  const paidPrev = paid.monthly[paid.monthly.length - 2];
+  const totalFollowers = (filteredFb.at(-1)?.followers ?? 0) + (filteredIg.at(-1)?.followers ?? 0) + (filteredTk.at(-1)?.followers ?? 0);
+  const prevFollowers = (filteredFb.at(-2)?.followers ?? 0) + (filteredIg.at(-2)?.followers ?? 0) + (filteredTk.at(-2)?.followers ?? 0);
+  const followersChange = prevFollowers > 0 ? ((totalFollowers - prevFollowers) / prevFollowers * 100).toFixed(1) : '0';
 
-  const latestFlyer = flyers.flyers[flyers.flyers.length - 1];
-  const prevFlyer = flyers.flyers[flyers.flyers.length - 2];
+  const paidLatest = filteredPaid.at(-1);
+  const paidPrev = filteredPaid.at(-2);
+
+  const filteredFlyers = useMemo(() => {
+    const withMonth = flyers.flyers.map(f => ({ ...f, month: f.month }));
+    return filterByTimeRange(withMonth, timeRange);
+  }, [flyers, timeRange]);
+  const latestFlyer = filteredFlyers.at(-1);
+  const prevFlyer = filteredFlyers.at(-2);
 
   const totalKpis = kpis.categories.reduce((s, c) => s + c.kpis.length, 0);
 
-  const chartData = paid.monthly.map((m) => ({
+  const chartData = filteredPaid.map((m) => ({
     month: formatMonth(m.month),
     'Wydatki reklamowe': m.ad_spend,
     'Przychód': m.revenue,
   }));
 
+  if (!paidLatest) return <div className="text-muted text-center py-12">Brak danych dla wybranego zakresu</div>;
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <h2 className="text-lg font-semibold">Podsumowanie</h2>
         <div className="flex gap-2">
           <PdfExportButton section="overview" label="Pobierz podsumowanie" variant="outline" size="sm" />
           <PdfExportButton section="all" label="Pełny raport PDF" size="sm" />
         </div>
       </div>
+
+      <TimeRangeFilter value={timeRange} onChange={setTimeRange} availableMonths={allMonths} />
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard
           title="Obserwujący (łącznie)"
@@ -76,44 +91,44 @@ export default function OverviewPanel() {
         <KpiCard
           title="Ruch E-com"
           value={formatNumber(paidLatest.traffic)}
-          change={`${((paidLatest.traffic - paidPrev.traffic) / paidPrev.traffic * 100).toFixed(1)}%`}
+          change={paidPrev ? `${((paidLatest.traffic - paidPrev.traffic) / paidPrev.traffic * 100).toFixed(1)}%` : '—'}
           icon={Eye}
-          positive={paidLatest.traffic > paidPrev.traffic}
+          positive={paidPrev ? paidLatest.traffic > paidPrev.traffic : true}
         />
         <KpiCard
           title="Zamówienia"
           value={formatNumber(paidLatest.orders)}
-          change={`${((paidLatest.orders - paidPrev.orders) / paidPrev.orders * 100).toFixed(1)}%`}
+          change={paidPrev ? `${((paidLatest.orders - paidPrev.orders) / paidPrev.orders * 100).toFixed(1)}%` : '—'}
           icon={ShoppingCart}
-          positive={paidLatest.orders > paidPrev.orders}
+          positive={paidPrev ? paidLatest.orders > paidPrev.orders : true}
         />
         <KpiCard
           title="Konwersja"
           value={formatPercent(paidLatest.conversion_rate)}
-          change={`${(paidLatest.conversion_rate - paidPrev.conversion_rate).toFixed(1)}pp`}
+          change={paidPrev ? `${(paidLatest.conversion_rate - paidPrev.conversion_rate).toFixed(1)}pp` : '—'}
           icon={Percent}
-          positive={paidLatest.conversion_rate > paidPrev.conversion_rate}
+          positive={paidPrev ? paidLatest.conversion_rate > paidPrev.conversion_rate : true}
         />
         <KpiCard
           title="Retencja"
           value={formatPercent(paidLatest.retention_rate)}
-          change={`${(paidLatest.retention_rate - paidPrev.retention_rate).toFixed(1)}pp`}
+          change={paidPrev ? `${(paidLatest.retention_rate - paidPrev.retention_rate).toFixed(1)}pp` : '—'}
           icon={TrendingUp}
-          positive={paidLatest.retention_rate > paidPrev.retention_rate}
+          positive={paidPrev ? paidLatest.retention_rate > paidPrev.retention_rate : true}
         />
         <KpiCard
           title="CTR Gazetki"
-          value={formatPercent(latestFlyer.ctr)}
-          change={`${(latestFlyer.ctr - prevFlyer.ctr).toFixed(1)}pp`}
+          value={latestFlyer ? formatPercent(latestFlyer.ctr) : '—'}
+          change={latestFlyer && prevFlyer ? `${(latestFlyer.ctr - prevFlyer.ctr).toFixed(1)}pp` : '—'}
           icon={Newspaper}
-          positive={latestFlyer.ctr > prevFlyer.ctr}
+          positive={latestFlyer && prevFlyer ? latestFlyer.ctr > prevFlyer.ctr : true}
         />
         <KpiCard
           title="ROAS"
           value={`${(paidLatest.revenue / paidLatest.ad_spend).toFixed(1)}x`}
-          change={`${((paidLatest.revenue / paidLatest.ad_spend) - (paidPrev.revenue / paidPrev.ad_spend)).toFixed(1)}x`}
+          change={paidPrev ? `${((paidLatest.revenue / paidLatest.ad_spend) - (paidPrev.revenue / paidPrev.ad_spend)).toFixed(1)}x` : '—'}
           icon={TrendingUp}
-          positive={(paidLatest.revenue / paidLatest.ad_spend) > (paidPrev.revenue / paidPrev.ad_spend)}
+          positive={paidPrev ? (paidLatest.revenue / paidLatest.ad_spend) > (paidPrev.revenue / paidPrev.ad_spend) : true}
         />
         <KpiCard
           title="KPI zrealizowane"

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { getSocialMediaData } from '@/lib/data';
 import { formatNumber, formatPercent, formatMonth } from '@/lib/formatters';
 import type { PlatformName } from '@/types';
@@ -8,6 +8,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, Bar,
 } from 'recharts';
 import PdfExportButton from '@/components/ui/pdf-export-button';
+import TimeRangeFilter, { filterByTimeRange, type TimeRangeValue } from '@/components/ui/time-range-filter';
 
 const platformColors: Record<PlatformName, string> = {
   facebook: '#1877F2',
@@ -25,24 +26,37 @@ type FilterPlatform = PlatformName | 'all';
 
 export default function SocialMediaPanel() {
   const [platform, setPlatform] = useState<FilterPlatform>('all');
+  const [timeRange, setTimeRange] = useState<TimeRangeValue>({ type: 'all' });
   const data = getSocialMediaData();
 
   const platforms: PlatformName[] = ['facebook', 'instagram', 'tiktok'];
   const filteredPlatforms = platform === 'all' ? platforms : [platform];
 
+  const allMonths = data.platforms.facebook.monthly.map(m => m.month);
+
+  const filteredData = useMemo(() => ({
+    platforms: {
+      facebook: { monthly: filterByTimeRange(data.platforms.facebook.monthly, timeRange) },
+      instagram: { monthly: filterByTimeRange(data.platforms.instagram.monthly, timeRange) },
+      tiktok: { monthly: filterByTimeRange(data.platforms.tiktok.monthly, timeRange) },
+    }
+  }), [data, timeRange]);
+
   // Followers chart data
-  const months = data.platforms.facebook.monthly.map(m => m.month);
+  const months = filteredData.platforms.facebook.monthly.map(m => m.month);
   const followersData = months.map((month, i) => {
     const row: Record<string, string | number> = { month: formatMonth(month) };
     platforms.forEach(p => {
-      row[platformLabels[p]] = data.platforms[p].monthly[i].followers;
+      const entry = filteredData.platforms[p].monthly[i];
+      if (entry) row[platformLabels[p]] = entry.followers;
     });
     return row;
   });
 
   // Latest stats per platform
   const latestStats = platforms.map(p => {
-    const monthly = data.platforms[p].monthly;
+    const monthly = filteredData.platforms[p].monthly;
+    if (monthly.length < 2) return null;
     const latest = monthly[monthly.length - 1];
     const prev = monthly[monthly.length - 2];
     return {
@@ -55,14 +69,26 @@ export default function SocialMediaPanel() {
       interactions: latest.interactions,
       ratio: latest.ratio_interactions_followers,
     };
-  });
+  }).filter(Boolean) as {
+    platform: PlatformName;
+    label: string;
+    followers: number;
+    followersChange: string;
+    views: number;
+    covering: number;
+    interactions: number;
+    ratio: number;
+  }[];
 
   // Engagement data for selected platforms
   const engagementData = months.map((month, i) => {
     const row: Record<string, string | number> = { month: formatMonth(month) };
     filteredPlatforms.forEach(p => {
-      row[`${platformLabels[p]} Views`] = data.platforms[p].monthly[i].views;
-      row[`${platformLabels[p]} Covering`] = data.platforms[p].monthly[i].covering;
+      const entry = filteredData.platforms[p].monthly[i];
+      if (entry) {
+        row[`${platformLabels[p]} Views`] = entry.views;
+        row[`${platformLabels[p]} Covering`] = entry.covering;
+      }
     });
     return row;
   });
@@ -89,6 +115,7 @@ export default function SocialMediaPanel() {
         </div>
         <PdfExportButton section="social-media" size="sm" />
       </div>
+      <TimeRangeFilter value={timeRange} onChange={setTimeRange} availableMonths={allMonths} />
 
       {/* Summary cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -185,7 +212,7 @@ export default function SocialMediaPanel() {
           </thead>
           <tbody>
             {filteredPlatforms.flatMap(p =>
-              data.platforms[p].monthly.slice(-6).map((m) => (
+              filteredData.platforms[p].monthly.slice(-6).map((m) => (
                 <tr key={`${p}-${m.month}`} className="border-b border-gray-50 hover:bg-gray-50">
                   <td className="py-2 px-3">{formatMonth(m.month)}</td>
                   <td className="py-2 px-3">

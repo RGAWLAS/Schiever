@@ -9,6 +9,7 @@ import {
 } from 'recharts';
 import { ShoppingCart, Newspaper, ChevronDown, ChevronRight } from 'lucide-react';
 import PdfExportButton from '@/components/ui/pdf-export-button';
+import TimeRangeFilter, { type TimeRangeValue, filterByTimeRange } from '@/components/ui/time-range-filter';
 import type { KpiMetric } from '@/types';
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -116,6 +117,13 @@ export default function KpiPanel() {
   );
   const [selectedKpi, setSelectedKpi] = useState<KpiWithActuals | null>(null);
   const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [timeRange, setTimeRange] = useState<TimeRangeValue>({ type: 'all' });
+
+  const allMonths = useMemo(() => {
+    const monthSet = new Set<string>();
+    kpiData.categories.forEach(c => c.kpis.forEach(k => Object.keys(k.targets).forEach(m => monthSet.add(m))));
+    return Array.from(monthSet).sort();
+  }, [kpiData]);
 
   const allKpisWithActuals = useMemo(() => {
     const result: KpiWithActuals[] = [];
@@ -123,11 +131,15 @@ export default function KpiPanel() {
     for (const category of kpiData.categories) {
       for (const kpi of category.kpis) {
         const months = Object.keys(kpi.targets).sort();
-        const monthlyData = months.map(month => ({
+        const allMonthlyData = months.map(month => ({
           month,
           target: kpi.targets[month],
           actual: getActualValue(category.id, kpi.metric, month, socialData, paidData, flyersData),
         }));
+
+        const monthlyData = filterByTimeRange(allMonthlyData, timeRange);
+
+        if (monthlyData.length === 0) continue;
 
         const latest = monthlyData[monthlyData.length - 1];
         const ratio = latest.actual !== null ? latest.actual / latest.target : 0;
@@ -144,7 +156,7 @@ export default function KpiPanel() {
       }
     }
     return result;
-  }, [kpiData, socialData, paidData, flyersData]);
+  }, [kpiData, socialData, paidData, flyersData, timeRange]);
 
   const toggleCategory = (id: string) => {
     const next = new Set(expandedCategories);
@@ -164,8 +176,11 @@ export default function KpiPanel() {
     ? kpiData.categories
     : kpiData.categories.filter(c => c.id === filterCategory);
 
-  // Trend data for selected KPI
-  const trendData = selectedKpi?.monthlyData.map(m => ({
+  // Trend data for selected KPI — use current filtered data so it respects time range
+  const currentSelectedKpi = selectedKpi
+    ? allKpisWithActuals.find(k => k.kpi.id === selectedKpi.kpi.id) ?? selectedKpi
+    : null;
+  const trendData = currentSelectedKpi?.monthlyData.map(m => ({
     month: formatMonth(m.month),
     'Cel': m.target,
     'Realizacja': m.actual ?? 0,
@@ -185,6 +200,9 @@ export default function KpiPanel() {
         <h2 className="text-lg font-semibold">Realizacja KPI</h2>
         <PdfExportButton section="kpi" size="sm" />
       </div>
+
+      {/* Time range filter */}
+      <TimeRangeFilter value={timeRange} onChange={setTimeRange} availableMonths={allMonths} />
 
       {/* Overall summary */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
@@ -324,16 +342,16 @@ export default function KpiPanel() {
       })}
 
       {/* Selected KPI trend chart */}
-      {selectedKpi && (
+      {currentSelectedKpi && (
         <div className="bg-white rounded-xl border border-border p-6 shadow-sm">
           <div className="flex items-center justify-between mb-1">
-            <h3 className="text-lg font-semibold">{selectedKpi.kpi.name}</h3>
-            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${getStatusBg(selectedKpi.ratio)}`}>
-              {getStatusLabel(selectedKpi.ratio)}
+            <h3 className="text-lg font-semibold">{currentSelectedKpi.kpi.name}</h3>
+            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${getStatusBg(currentSelectedKpi.ratio)}`}>
+              {getStatusLabel(currentSelectedKpi.ratio)}
             </span>
           </div>
           <p className="text-sm text-muted mb-4">
-            {kpiData.categories.find(c => c.id === selectedKpi.categoryId)?.name} — Trend: cel vs. realizacja
+            {kpiData.categories.find(c => c.id === currentSelectedKpi.categoryId)?.name} — Trend: cel vs. realizacja
           </p>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={trendData}>
@@ -343,7 +361,7 @@ export default function KpiPanel() {
               <Tooltip />
               <Legend />
               <Line type="monotone" dataKey="Cel" stroke="#94a3b8" strokeWidth={2} strokeDasharray="5 5" dot={false} />
-              <Line type="monotone" dataKey="Realizacja" stroke={CATEGORY_COLORS[selectedKpi.categoryId] || '#1e40af'} strokeWidth={2} dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="Realizacja" stroke={CATEGORY_COLORS[currentSelectedKpi.categoryId] || '#1e40af'} strokeWidth={2} dot={{ r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -385,13 +403,12 @@ export default function KpiPanel() {
             </tr>
           </thead>
           <tbody>
-            {kpiData.categories.map(category =>
-              allKpisWithActuals
-                .filter(k => k.categoryId === category.id)
-                .map((k, i) => (
+            {kpiData.categories.map(category => {
+              const categoryKpisFiltered = allKpisWithActuals.filter(k => k.categoryId === category.id);
+              return categoryKpisFiltered.map((k, i) => (
                   <tr key={k.kpi.id} className="border-b border-gray-50 hover:bg-gray-50">
                     {i === 0 && (
-                      <td className="py-2 px-3 font-medium align-top" rowSpan={category.kpis.length}>
+                      <td className="py-2 px-3 font-medium align-top" rowSpan={categoryKpisFiltered.length}>
                         <div className="flex items-center gap-2">
                           <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: CATEGORY_COLORS[category.id] }} />
                           {category.name}
@@ -410,8 +427,8 @@ export default function KpiPanel() {
                       </span>
                     </td>
                   </tr>
-                ))
-            )}
+                ));
+            })}
           </tbody>
         </table>
       </div>

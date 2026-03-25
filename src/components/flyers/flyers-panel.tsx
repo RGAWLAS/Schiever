@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { getFlyersData } from '@/lib/data';
 import { formatNumber, formatPercent, formatMonthFull } from '@/lib/formatters';
 import {
@@ -10,12 +10,21 @@ import {
 import { X, FileText, Eye, MousePointerClick, BookOpen, Package } from 'lucide-react';
 import type { Flyer } from '@/types';
 import PdfExportButton from '@/components/ui/pdf-export-button';
+import TimeRangeFilter, { filterByTimeRange, type TimeRangeValue } from '@/components/ui/time-range-filter';
 
 export default function FlyersPanel() {
   const data = getFlyersData();
   const [selectedFlyer, setSelectedFlyer] = useState<Flyer | null>(null);
+  const [timeRange, setTimeRange] = useState<TimeRangeValue>({ type: 'all' });
 
-  const chartData = data.flyers.map(f => ({
+  const allMonths = data.flyers.map(f => f.month);
+
+  const filtered = useMemo(() => {
+    const withMonth = data.flyers.map(f => ({ ...f, month: f.month }));
+    return filterByTimeRange(withMonth, timeRange);
+  }, [data, timeRange]);
+
+  const chartData = filtered.map(f => ({
     month: f.month.substring(5),
     title: f.title,
     'Nakład': f.volume,
@@ -29,6 +38,9 @@ export default function FlyersPanel() {
         <h2 className="text-lg font-semibold">Gazetki Promocyjne</h2>
         <PdfExportButton section="flyers" size="sm" />
       </div>
+
+      {/* Time Range Filter */}
+      <TimeRangeFilter value={timeRange} onChange={setTimeRange} availableMonths={allMonths} />
 
       {/* Metrics chart */}
       <div className="bg-white rounded-xl border border-border p-6 shadow-sm">
@@ -52,25 +64,31 @@ export default function FlyersPanel() {
       {/* Flyer Grid */}
       <div>
         <h3 className="text-lg font-semibold mb-4">Przegląd gazetek</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {data.flyers.map(flyer => (
-            <button
-              key={flyer.id}
-              onClick={() => setSelectedFlyer(flyer)}
-              className="bg-white rounded-xl border border-border p-4 shadow-sm hover:shadow-md transition-shadow text-left"
-            >
-              <div className="w-full h-32 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg mb-3 flex items-center justify-center">
-                <FileText size={40} className="text-primary opacity-40" />
-              </div>
-              <h4 className="font-semibold text-sm mb-1">{flyer.title}</h4>
-              <p className="text-xs text-muted">{formatMonthFull(flyer.month)}</p>
-              <div className="flex items-center justify-between mt-2 text-xs">
-                <span className="text-muted">Nakład: {formatNumber(flyer.volume)}</span>
-                <span className="font-medium text-primary">CTR: {flyer.ctr}%</span>
-              </div>
-            </button>
-          ))}
-        </div>
+        {filtered.length === 0 ? (
+          <div className="bg-white rounded-xl border border-border p-8 shadow-sm text-center text-muted">
+            Brak gazetek w wybranym zakresie czasu.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {filtered.map(flyer => (
+              <button
+                key={flyer.id}
+                onClick={() => setSelectedFlyer(flyer)}
+                className="bg-white rounded-xl border border-border p-4 shadow-sm hover:shadow-md transition-shadow text-left"
+              >
+                <div className="w-full h-32 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg mb-3 flex items-center justify-center">
+                  <FileText size={40} className="text-primary opacity-40" />
+                </div>
+                <h4 className="font-semibold text-sm mb-1">{flyer.title}</h4>
+                <p className="text-xs text-muted">{formatMonthFull(flyer.month)}</p>
+                <div className="flex items-center justify-between mt-2 text-xs">
+                  <span className="text-muted">Nakład: {formatNumber(flyer.volume)}</span>
+                  <span className="font-medium text-primary">CTR: {flyer.ctr}%</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Flyer Detail Modal */}
