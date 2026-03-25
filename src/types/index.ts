@@ -1,6 +1,17 @@
-export type TabId = 'overview' | 'social-media' | 'paid-media' | 'flyers' | 'invoicing' | 'kpi';
+export type TabId = 'overview' | 'social-media' | 'paid-media' | 'flyers' | 'invoicing' | 'kpi' | 'photos';
 
 export type PlatformName = 'facebook' | 'instagram' | 'tiktok';
+
+export interface PhotoItem {
+  id: string;
+  name: string;
+  size: number;
+  type: string;
+  dataUrl: string;
+  category: string;
+  uploadedAt: string;
+  tags: string[];
+}
 
 export interface SocialMediaMonth {
   month: string;

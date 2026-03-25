@@ -10,6 +10,7 @@ import PaidMediaPanel from '@/components/paid-media/paid-media-panel';
 import FlyersPanel from '@/components/flyers/flyers-panel';
 import InvoicingPanel from '@/components/invoicing/invoicing-panel';
 import KpiPanel from '@/components/kpi/kpi-panel';
+import PhotosPanel from '@/components/photos/photos-panel';
 
 const panels: Record<TabId, React.ComponentType> = {
   'overview': OverviewPanel,
@@ -18,6 +19,7 @@ const panels: Record<TabId, React.ComponentType> = {
   'flyers': FlyersPanel,
   'invoicing': InvoicingPanel,
   'kpi': KpiPanel,
+  'photos': PhotosPanel,
 };
 
 export default function Home() {
