@@ -57,13 +57,15 @@ export interface FlyersData {
 export interface InvoiceLineItem {
   description: string;
   category: string;
-  amount: number;
+  budget: number;
+  actual: number;
 }
 
 export interface Invoice {
   month: string;
   line_items: InvoiceLineItem[];
-  total: number;
+  total_budget: number;
+  total_actual: number;
   currency: string;
   status: string;
 }

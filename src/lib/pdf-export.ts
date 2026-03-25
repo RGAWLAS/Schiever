@@ -319,35 +319,33 @@ function addFlyersSection(doc: JsPDFWithAutoTable): void {
 function addInvoicingSection(doc: JsPDFWithAutoTable): void {
   doc.addPage();
   const data = getInvoicingData();
-  addPageHeader(doc, 'Fakturowanie', 'Zestawienie kosztów i historia faktur');
+  addPageHeader(doc, 'Fakturowanie', 'Budżet vs. wykonanie');
 
   let y = 50;
 
   const rows = data.invoices.map(inv => {
-    const byCategory: Record<string, number> = {};
-    inv.line_items.forEach(item => { byCategory[item.category] = item.amount; });
+    const diff = inv.total_budget - inv.total_actual;
+    const pct = inv.total_budget > 0 ? ((inv.total_actual / inv.total_budget) * 100).toFixed(1) : '—';
     return [
       formatMonthFull(inv.month),
-      formatCurrency(byCategory['social'] || 0),
-      formatCurrency(byCategory['paid'] || 0),
-      formatCurrency(byCategory['content'] || 0),
-      formatCurrency(byCategory['flyers'] || 0),
-      formatCurrency(byCategory['strategy'] || 0),
-      formatCurrency(inv.total),
+      formatCurrency(inv.total_budget),
+      formatCurrency(inv.total_actual),
+      `${diff >= 0 ? '+' : ''}${formatCurrency(diff)}`,
+      `${pct}%`,
       inv.status === 'paid' ? 'Opłacona' : 'Oczekująca',
     ];
   });
 
   autoTable(doc, {
     startY: y,
-    head: [['Miesiąc', 'Social', 'Paid Media', 'Content', 'Gazetki', 'Strategia', 'Razem', 'Status']],
+    head: [['Miesiąc', 'Budżet', 'Wykonanie', 'Różnica', '% wyk.', 'Status']],
     body: rows,
     theme: 'striped',
-    headStyles: { fillColor: [...PRIMARY], fontSize: 7, fontStyle: 'bold' },
-    bodyStyles: { fontSize: 7 },
+    headStyles: { fillColor: [...PRIMARY], fontSize: 8, fontStyle: 'bold' },
+    bodyStyles: { fontSize: 8 },
     columnStyles: {
       1: { halign: 'right' }, 2: { halign: 'right' }, 3: { halign: 'right' },
-      4: { halign: 'right' }, 5: { halign: 'right' }, 6: { halign: 'right', fontStyle: 'bold' },
+      4: { halign: 'right' },
     },
     margin: { left: 14, right: 14 },
   });
@@ -356,18 +354,17 @@ function addInvoicingSection(doc: JsPDFWithAutoTable): void {
   y = checkPageBreak(doc, y, 30);
   y = addSectionTitle(doc, y, 'Podsumowanie finansowe');
 
-  const totalSpent = data.invoices.reduce((s, inv) => s + inv.total, 0);
-  const avgMonthly = totalSpent / data.invoices.length;
-  const paidCount = data.invoices.filter(i => i.status === 'paid').length;
+  const totalBudget = data.invoices.reduce((s, inv) => s + inv.total_budget, 0);
+  const totalActual = data.invoices.reduce((s, inv) => s + inv.total_actual, 0);
 
   autoTable(doc, {
     startY: y,
     head: [['Wskaźnik', 'Wartość']],
     body: [
-      ['Łączne wydatki', formatCurrency(totalSpent)],
-      ['Średnia miesięczna', formatCurrency(avgMonthly)],
-      ['Faktury opłacone', `${paidCount}/${data.invoices.length}`],
-      ['Faktury oczekujące', `${data.invoices.length - paidCount}`],
+      ['Łączny budżet', formatCurrency(totalBudget)],
+      ['Łączne wykonanie', formatCurrency(totalActual)],
+      ['Oszczędności', formatCurrency(totalBudget - totalActual)],
+      ['% wykorzystania budżetu', `${(totalActual / totalBudget * 100).toFixed(1)}%`],
     ],
     theme: 'grid',
     headStyles: { fillColor: [...ACCENT], fontSize: 9, fontStyle: 'bold' },
