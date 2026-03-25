@@ -7,6 +7,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 import type { KPI } from '@/types';
+import PdfExportButton from '@/components/ui/pdf-export-button';
 
 function getStatusColor(ratio: number): string {
   if (ratio >= 0.9) return 'bg-green-500';
@@ -41,6 +42,12 @@ export default function KpiPanel() {
   return (
     <div className="space-y-6">
       {/* Overall KPI score */}
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">Realizacja KPI</h2>
+        <PdfExportButton section="kpi" size="sm" />
+      </div>
+
       <div className="bg-white rounded-xl border border-border p-6 shadow-sm">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-lg font-semibold">Ogólna realizacja KPI</h3>

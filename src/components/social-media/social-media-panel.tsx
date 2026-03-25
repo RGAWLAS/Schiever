@@ -7,6 +7,7 @@ import type { PlatformName } from '@/types';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, Bar,
 } from 'recharts';
+import PdfExportButton from '@/components/ui/pdf-export-button';
 
 const platformColors: Record<PlatformName, string> = {
   facebook: '#1877F2',
@@ -68,9 +69,10 @@ export default function SocialMediaPanel() {
 
   return (
     <div className="space-y-6">
-      {/* Filter */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <span className="text-sm font-medium text-muted">Platforma:</span>
+      {/* Header + Filter */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="text-sm font-medium text-muted">Platforma:</span>
         {(['all', ...platforms] as FilterPlatform[]).map((p) => (
           <button
             key={p}
@@ -84,6 +86,8 @@ export default function SocialMediaPanel() {
             {p === 'all' ? 'Wszystkie' : platformLabels[p]}
           </button>
         ))}
+        </div>
+        <PdfExportButton section="social-media" size="sm" />
       </div>
 
       {/* Summary cards */}
@@ -165,12 +169,7 @@ export default function SocialMediaPanel() {
       <div className="bg-white rounded-xl border border-border p-6 shadow-sm overflow-x-auto">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Szczegółowe dane</h3>
-          <button
-            onClick={() => window.print()}
-            className="px-4 py-2 bg-primary text-white rounded-lg text-sm hover:bg-primary-light transition-colors"
-          >
-            Eksportuj raport
-          </button>
+          <PdfExportButton section="social-media" label="Eksportuj raport" size="sm" />
         </div>
         <table className="w-full text-sm">
           <thead>
