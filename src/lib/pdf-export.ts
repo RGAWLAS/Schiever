@@ -374,34 +374,6 @@ function addInvoicingSection(doc: JsPDFWithAutoTable): void {
   });
 }
 
-// ---- KPI helper to get actual values ----
-function getKpiActual(
-  categoryId: string, metric: string, month: string,
-): number | null {
-  if (categoryId === 'ecommerce') {
-    const entry = getPaidMediaData().monthly.find(m => m.month === month);
-    if (!entry) return null;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (entry as any)[metric] as number ?? null;
-  }
-  const platformMap: Record<string, 'facebook' | 'instagram' | 'tiktok'> = {
-    'social-facebook': 'facebook', 'social-instagram': 'instagram', 'social-tiktok': 'tiktok',
-  };
-  if (platformMap[categoryId]) {
-    const entry = getSocialMediaData().platforms[platformMap[categoryId]].monthly.find(m => m.month === month);
-    if (!entry) return null;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (entry as any)[metric] as number ?? null;
-  }
-  if (categoryId === 'flyers') {
-    const entry = getFlyersData().flyers.find(f => f.month === month);
-    if (!entry) return null;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (entry as any)[metric] as number ?? null;
-  }
-  return null;
-}
-
 function formatKpiVal(value: number, format: string, unit: string): string {
   if (format === 'percent') return `${value.toFixed(1)}${unit}`;
   return formatNumber(value);
@@ -420,16 +392,14 @@ function addKpiSection(doc: JsPDFWithAutoTable): void {
     y = addSectionTitle(doc, y, category.name);
 
     const rows = category.kpis.map(kpi => {
-      const months = Object.keys(kpi.targets).sort();
-      const latestMonth = months[months.length - 1];
-      const target = kpi.targets[latestMonth];
-      const actual = getKpiActual(category.id, kpi.metric, latestMonth);
-      const ratio = actual !== null ? actual / target : 0;
+      const latest = kpi.actuals[kpi.actuals.length - 1];
+      if (!latest) return [kpi.name, '—', '—', '—', 'brak danych'];
+      const ratio = latest.actual !== null && latest.target > 0 ? latest.actual / latest.target : 0;
       const status = ratio >= 1.0 ? 'Zrealizowany' : ratio >= 0.9 ? 'Na dobrej drodze' : ratio >= 0.7 ? 'Wymaga uwagi' : 'Zagrożony';
       return [
         kpi.name,
-        formatKpiVal(target, kpi.format, kpi.unit),
-        actual !== null ? formatKpiVal(actual, kpi.format, kpi.unit) : '—',
+        formatKpiVal(latest.target, kpi.format, kpi.unit),
+        latest.actual !== null ? formatKpiVal(latest.actual, kpi.format, kpi.unit) : '—',
         `${Math.round(ratio * 100)}%`,
         status,
       ];

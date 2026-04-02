@@ -74,9 +74,17 @@ export interface InvoicingData {
   invoices: Invoice[];
 }
 
-export interface KpiWeekly {
+export interface KpiWeeklyEntry {
   period: string;
   value: number;
+}
+
+export interface KpiMonthlyActual {
+  month: string;
+  target: number;
+  actual: number | null;
+  realization_pct: number | null;
+  weekly: KpiWeeklyEntry[];
 }
 
 export interface KpiMetric {
@@ -86,7 +94,7 @@ export interface KpiMetric {
   unit: string;
   format: 'number' | 'percent';
   targets: Record<string, number>;
-  weekly?: KpiWeekly[];
+  actuals: KpiMonthlyActual[];
 }
 
 export interface KpiCategory {
