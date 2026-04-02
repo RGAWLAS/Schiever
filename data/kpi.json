@@ -13,8 +13,8 @@
               "weekly": [{ "period": "do 18.01", "value": 13351 }, { "period": "19-25.01", "value": 4768 }] },
             { "month": "2026-02", "target": 31000, "actual": 16130, "realization_pct": 52.0,
               "weekly": [{ "period": "1-8.02", "value": 4268 }, { "period": "9-15.02", "value": 4054 }, { "period": "16-22.02", "value": 4707 }, { "period": "23-28.02", "value": 3101 }] },
-            { "month": "2026-03", "target": 32000, "actual": 15841, "realization_pct": 49.5,
-              "weekly": [{ "period": "1-8.03", "value": 5035 }, { "period": "9-15.03", "value": 5135 }, { "period": "16-22.03", "value": 5671 }] }
+            { "month": "2026-03", "target": 32000, "actual": 23671, "realization_pct": 74.0,
+              "weekly": [{ "period": "1-8.03", "value": 5035 }, { "period": "9-15.03", "value": 5135 }, { "period": "16-22.03", "value": 5671 }, { "period": "23-29.03", "value": 5860 }, { "period": "30-31.03", "value": 1970 }] }
           ]
         },
         {
@@ -25,8 +25,8 @@
               "weekly": [{ "period": "do 18.01", "value": 1.98 }, { "period": "19-25.01", "value": 3.90 }] },
             { "month": "2026-02", "target": 2.10, "actual": 4.25, "realization_pct": 202.2,
               "weekly": [{ "period": "1-8.02", "value": 4.24 }, { "period": "9-15.02", "value": 4.34 }, { "period": "16-22.02", "value": 3.87 }, { "period": "23-28.02", "value": 4.71 }] },
-            { "month": "2026-03", "target": 2.20, "actual": 3.81, "realization_pct": 173.3,
-              "weekly": [{ "period": "1-8.03", "value": 3.57 }, { "period": "9-15.03", "value": 4.42 }, { "period": "16-22.03", "value": 3.47 }] }
+            { "month": "2026-03", "target": 2.20, "actual": 3.15, "realization_pct": 143.1,
+              "weekly": [{ "period": "1-8.03", "value": 3.34 }, { "period": "9-15.03", "value": 3.14 }, { "period": "16-22.03", "value": 2.89 }, { "period": "23-29.03", "value": 3.04 }, { "period": "30-31.03", "value": 3.76 }] }
           ]
         },
         {
@@ -37,8 +37,8 @@
               "weekly": [{ "period": "do 18.01", "value": 378 }, { "period": "19-25.01", "value": 186 }] },
             { "month": "2026-02", "target": 650, "actual": 685, "realization_pct": 105.4,
               "weekly": [{ "period": "1-8.02", "value": 181 }, { "period": "9-15.02", "value": 176 }, { "period": "16-22.02", "value": 182 }, { "period": "23-28.02", "value": 146 }] },
-            { "month": "2026-03", "target": 700, "actual": 604, "realization_pct": 86.3,
-              "weekly": [{ "period": "1-8.03", "value": 180 }, { "period": "9-15.03", "value": 227 }, { "period": "16-22.03", "value": 197 }] }
+            { "month": "2026-03", "target": 700, "actual": 745, "realization_pct": 106.4,
+              "weekly": [{ "period": "1-8.03", "value": 168 }, { "period": "9-15.03", "value": 161 }, { "period": "16-22.03", "value": 164 }, { "period": "23-29.03", "value": 178 }, { "period": "30-31.03", "value": 74 }] }
           ]
         },
         {
@@ -47,7 +47,7 @@
           "actuals": [
             { "month": "2026-01", "target": 15.00, "actual": 16.00, "realization_pct": 106.7, "weekly": [] },
             { "month": "2026-02", "target": 18.00, "actual": 18.10, "realization_pct": 100.6, "weekly": [] },
-            { "month": "2026-03", "target": 21.00, "actual": 14.50, "realization_pct": 69.0, "weekly": [] }
+            { "month": "2026-03", "target": 21.00, "actual": 16.51, "realization_pct": 78.6, "weekly": [] }
           ]
         }
       ]
@@ -65,8 +65,8 @@
               "weekly": [{ "period": "do 18.01", "value": 30886 }, { "period": "19-25.01", "value": 31048 }, { "period": "26-31.01", "value": 31257 }] },
             { "month": "2026-02", "target": 31500, "actual": 32372, "realization_pct": 102.8,
               "weekly": [{ "period": "1-8.02", "value": 31527 }, { "period": "9-15.02", "value": 31724 }, { "period": "16-22.02", "value": 31984 }, { "period": "23-28.02", "value": 32178 }] },
-            { "month": "2026-03", "target": 32000, "actual": 32800, "realization_pct": 102.5,
-              "weekly": [{ "period": "1-8.03", "value": 32555 }, { "period": "9-15.03", "value": 32664 }, { "period": "16-22.03", "value": 32800 }] }
+            { "month": "2026-03", "target": 32000, "actual": 33016, "realization_pct": 103.2,
+              "weekly": [{ "period": "1-8.03", "value": 32555 }, { "period": "9-15.03", "value": 32664 }, { "period": "16-22.03", "value": 32800 }, { "period": "23-29.03", "value": 32969 }, { "period": "30-31.03", "value": 33016 }] }
           ]
         },
         {
@@ -77,8 +77,8 @@
               "weekly": [{ "period": "do 18.01", "value": 763830 }, { "period": "19-25.01", "value": 1257717 }, { "period": "26-31.01", "value": 1442190 }] },
             { "month": "2026-02", "target": 1260000, "actual": 1867531, "realization_pct": 148.2,
               "weekly": [{ "period": "1-8.02", "value": 358029 }, { "period": "9-15.02", "value": 849796 }, { "period": "16-22.02", "value": 1466596 }, { "period": "23-28.02", "value": 1867531 }] },
-            { "month": "2026-03", "target": 1280000, "actual": 938849, "realization_pct": 73.3,
-              "weekly": [{ "period": "1-8.03", "value": 346816 }, { "period": "9-15.03", "value": 642915 }, { "period": "16-22.03", "value": 938849 }] }
+            { "month": "2026-03", "target": 1280000, "actual": 1604137, "realization_pct": 125.3,
+              "weekly": [{ "period": "1-8.03", "value": 346816 }, { "period": "9-15.03", "value": 642915 }, { "period": "16-22.03", "value": 938849 }, { "period": "23-29.03", "value": 1410483 }, { "period": "30-31.03", "value": 1604137 }] }
           ]
         },
         {
@@ -89,8 +89,8 @@
               "weekly": [{ "period": "do 18.01", "value": 190228 }, { "period": "19-25.01", "value": 339343 }, { "period": "26-31.01", "value": 357678 }] },
             { "month": "2026-02", "target": 504000, "actual": 606799, "realization_pct": 120.4,
               "weekly": [{ "period": "1-8.02", "value": 146676 }, { "period": "9-15.02", "value": 305353 }, { "period": "16-22.02", "value": 506951 }, { "period": "23-28.02", "value": 606799 }] },
-            { "month": "2026-03", "target": 512000, "actual": 395770, "realization_pct": 77.3,
-              "weekly": [{ "period": "1-8.03", "value": 162534 }, { "period": "9-15.03", "value": 320133 }, { "period": "16-22.03", "value": 395770 }] }
+            { "month": "2026-03", "target": 512000, "actual": 574549, "realization_pct": 112.2,
+              "weekly": [{ "period": "1-8.03", "value": 162534 }, { "period": "9-15.03", "value": 320133 }, { "period": "16-22.03", "value": 395770 }, { "period": "23-29.03", "value": 509825 }, { "period": "30-31.03", "value": 574549 }] }
           ]
         },
         {
@@ -101,8 +101,8 @@
               "weekly": [{ "period": "do 18.01", "value": 2930 }, { "period": "19-25.01", "value": 3367 }, { "period": "26-31.01", "value": 2291 }] },
             { "month": "2026-02", "target": 6300, "actual": 2400, "realization_pct": 38.1,
               "weekly": [{ "period": "1-8.02", "value": 598 }, { "period": "9-15.02", "value": 1061 }, { "period": "16-22.02", "value": 1900 }, { "period": "23-28.02", "value": 2400 }] },
-            { "month": "2026-03", "target": 6400, "actual": 1217, "realization_pct": 19.0,
-              "weekly": [{ "period": "1-8.03", "value": 492 }, { "period": "9-15.03", "value": 788 }, { "period": "16-22.03", "value": 1217 }] }
+            { "month": "2026-03", "target": 6400, "actual": 2030, "realization_pct": 31.7,
+              "weekly": [{ "period": "1-8.03", "value": 492 }, { "period": "9-15.03", "value": 788 }, { "period": "16-22.03", "value": 1217 }, { "period": "23-29.03", "value": 1813 }, { "period": "30-31.03", "value": 2030 }] }
           ]
         }
       ]
@@ -120,8 +120,8 @@
               "weekly": [{ "period": "do 18.01", "value": 580 }, { "period": "19-25.01", "value": 585 }, { "period": "26-31.01", "value": 613 }] },
             { "month": "2026-02", "target": 1255, "actual": 746, "realization_pct": 59.4,
               "weekly": [{ "period": "1-8.02", "value": 629 }, { "period": "9-15.02", "value": 640 }, { "period": "16-22.02", "value": 681 }, { "period": "23-28.02", "value": 746 }] },
-            { "month": "2026-03", "target": 1910, "actual": 856, "realization_pct": 44.8,
-              "weekly": [{ "period": "1-8.03", "value": 816 }, { "period": "9-15.03", "value": 849 }, { "period": "16-22.03", "value": 856 }] }
+            { "month": "2026-03", "target": 1910, "actual": 908, "realization_pct": 47.5,
+              "weekly": [{ "period": "1-8.03", "value": 816 }, { "period": "9-15.03", "value": 849 }, { "period": "16-22.03", "value": 856 }, { "period": "23-29.03", "value": 906 }, { "period": "30-31.03", "value": 908 }] }
           ]
         },
         {
@@ -132,8 +132,8 @@
               "weekly": [{ "period": "do 18.01", "value": 80811 }, { "period": "19-25.01", "value": 136193 }, { "period": "26-31.01", "value": 220198 }] },
             { "month": "2026-02", "target": 200800, "actual": 313921, "realization_pct": 156.3,
               "weekly": [{ "period": "1-8.02", "value": 52785 }, { "period": "9-15.02", "value": 151653 }, { "period": "16-22.02", "value": 205040 }, { "period": "23-28.02", "value": 313921 }] },
-            { "month": "2026-03", "target": 305600, "actual": 229736, "realization_pct": 75.2,
-              "weekly": [{ "period": "1-8.03", "value": 179247 }, { "period": "9-15.03", "value": 204859 }, { "period": "16-22.03", "value": 229736 }] }
+            { "month": "2026-03", "target": 305600, "actual": 349328, "realization_pct": 114.3,
+              "weekly": [{ "period": "1-8.03", "value": 179247 }, { "period": "9-15.03", "value": 204859 }, { "period": "16-22.03", "value": 229736 }, { "period": "23-29.03", "value": 260879 }, { "period": "30-31.03", "value": 349328 }] }
           ]
         },
         {
@@ -144,8 +144,8 @@
               "weekly": [{ "period": "do 18.01", "value": 25631 }, { "period": "19-25.01", "value": 47414 }, { "period": "26-31.01", "value": 77845 }] },
             { "month": "2026-02", "target": 75300, "actual": 145828, "realization_pct": 193.7,
               "weekly": [{ "period": "1-8.02", "value": 27909 }, { "period": "9-15.02", "value": 88430 }, { "period": "16-22.02", "value": 106423 }, { "period": "23-28.02", "value": 145828 }] },
-            { "month": "2026-03", "target": 114600, "actual": 137934, "realization_pct": 120.4,
-              "weekly": [{ "period": "1-8.03", "value": 125922 }, { "period": "9-15.03", "value": 132259 }, { "period": "16-22.03", "value": 137934 }] }
+            { "month": "2026-03", "target": 114600, "actual": 195526, "realization_pct": 170.6,
+              "weekly": [{ "period": "1-8.03", "value": 125922 }, { "period": "9-15.03", "value": 132259 }, { "period": "16-22.03", "value": 137934 }, { "period": "23-29.03", "value": 152242 }, { "period": "30-31.03", "value": 195526 }] }
           ]
         },
         {
@@ -156,8 +156,8 @@
               "weekly": [{ "period": "do 18.01", "value": 193 }, { "period": "19-25.01", "value": 268 }, { "period": "26-31.01", "value": 817 }] },
             { "month": "2026-02", "target": 1004, "actual": 659, "realization_pct": 65.6,
               "weekly": [{ "period": "1-8.02", "value": 106 }, { "period": "9-15.02", "value": 200 }, { "period": "16-22.02", "value": 272 }, { "period": "23-28.02", "value": 659 }] },
-            { "month": "2026-03", "target": 1528, "actual": 295, "realization_pct": 19.3,
-              "weekly": [{ "period": "1-8.03", "value": 124 }, { "period": "9-15.03", "value": 198 }, { "period": "16-22.03", "value": 295 }] }
+            { "month": "2026-03", "target": 1528, "actual": 402, "realization_pct": 26.3,
+              "weekly": [{ "period": "1-8.03", "value": 124 }, { "period": "9-15.03", "value": 198 }, { "period": "16-22.03", "value": 295 }, { "period": "23-29.03", "value": 376 }, { "period": "30-31.03", "value": 402 }] }
           ]
         }
       ]
@@ -174,8 +174,8 @@
             { "month": "2026-01", "target": 900, "actual": 1016, "realization_pct": null, "weekly": [] },
             { "month": "2026-02", "target": 1591, "actual": 1382, "realization_pct": 86.9,
               "weekly": [{ "period": "1-8.02", "value": 100 }, { "period": "9-15.02", "value": 76 }, { "period": "16-22.02", "value": 94 }, { "period": "23-28.02", "value": 96 }] },
-            { "month": "2026-03", "target": 2282, "actual": 1515, "realization_pct": 66.4,
-              "weekly": [{ "period": "1-8.03", "value": 1441 }, { "period": "9-15.03", "value": 1482 }, { "period": "16-22.03", "value": 1515 }] }
+            { "month": "2026-03", "target": 2282, "actual": 1593, "realization_pct": 69.8,
+              "weekly": [{ "period": "1-8.03", "value": 1441 }, { "period": "9-15.03", "value": 1482 }, { "period": "16-22.03", "value": 1515 }, { "period": "23-29.03", "value": 1567 }, { "period": "30-31.03", "value": 1593 }] }
           ]
         },
         {
@@ -185,8 +185,8 @@
             { "month": "2026-01", "target": 144000, "actual": 82000, "realization_pct": null, "weekly": [] },
             { "month": "2026-02", "target": 254544, "actual": 436000, "realization_pct": 171.3,
               "weekly": [{ "period": "1-8.02", "value": 42000 }, { "period": "9-15.02", "value": 71000 }, { "period": "16-22.02", "value": 229000 }, { "period": "23-28.02", "value": 436000 }] },
-            { "month": "2026-03", "target": 365088, "actual": 239000, "realization_pct": 65.5,
-              "weekly": [{ "period": "1-8.03", "value": 112000 }, { "period": "9-15.03", "value": 167000 }, { "period": "16-22.03", "value": 239000 }] }
+            { "month": "2026-03", "target": 365088, "actual": 430000, "realization_pct": 117.8,
+              "weekly": [{ "period": "1-8.03", "value": 112000 }, { "period": "9-15.03", "value": 167000 }, { "period": "16-22.03", "value": 239000 }, { "period": "23-29.03", "value": 377000 }, { "period": "30-31.03", "value": 430000 }] }
           ]
         },
         {
@@ -196,8 +196,8 @@
             { "month": "2026-01", "target": 90000, "actual": 25000, "realization_pct": null, "weekly": [] },
             { "month": "2026-02", "target": 159090, "actual": 215570, "realization_pct": 135.5,
               "weekly": [{ "period": "1-8.02", "value": 30876 }, { "period": "9-15.02", "value": 53290 }, { "period": "16-22.02", "value": 119412 }, { "period": "23-28.02", "value": 215570 }] },
-            { "month": "2026-03", "target": 228180, "actual": 208216, "realization_pct": 91.3,
-              "weekly": [{ "period": "1-8.03", "value": 78033 }, { "period": "9-15.03", "value": 107248 }, { "period": "16-22.03", "value": 208216 }] }
+            { "month": "2026-03", "target": 228180, "actual": 222783, "realization_pct": 97.6,
+              "weekly": [{ "period": "1-8.03", "value": 78033 }, { "period": "9-15.03", "value": 107248 }, { "period": "16-22.03", "value": 136134 }, { "period": "23-29.03", "value": 184284 }, { "period": "30-31.03", "value": 222783 }] }
           ]
         },
         {
@@ -207,8 +207,8 @@
             { "month": "2026-01", "target": 720, "actual": 818, "realization_pct": null, "weekly": [] },
             { "month": "2026-02", "target": 1273, "actual": 2075, "realization_pct": 163.0,
               "weekly": [{ "period": "1-8.02", "value": 501 }, { "period": "9-15.02", "value": 967 }, { "period": "16-22.02", "value": 1536 }, { "period": "23-28.02", "value": 2075 }] },
-            { "month": "2026-03", "target": 1825, "actual": 1176, "realization_pct": 64.4,
-              "weekly": [{ "period": "1-8.03", "value": 437 }, { "period": "9-15.03", "value": 870 }, { "period": "16-22.03", "value": 1176 }] }
+            { "month": "2026-03", "target": 1825, "actual": 2190, "realization_pct": 120.0,
+              "weekly": [{ "period": "1-8.03", "value": 437 }, { "period": "9-15.03", "value": 870 }, { "period": "16-22.03", "value": 1176 }, { "period": "23-29.03", "value": 1845 }, { "period": "30-31.03", "value": 2190 }] }
           ]
         }
       ]
@@ -226,7 +226,7 @@
               "weekly": [{ "period": "19-25.01", "value": 5.28 }] },
             { "month": "2026-02", "target": 2.50, "actual": 2.90, "realization_pct": 116.0,
               "weekly": [{ "period": "1-8.02", "value": 2.30 }, { "period": "9-15.02", "value": 2.50 }, { "period": "16-22.02", "value": 2.60 }, { "period": "23-28.02", "value": 2.90 }] },
-            { "month": "2026-03", "target": 3.00, "actual": null, "realization_pct": 0, "weekly": [] }
+            { "month": "2026-03", "target": 3.00, "actual": 2.40, "realization_pct": 80.0, "weekly": [] }
           ]
         }
       ]

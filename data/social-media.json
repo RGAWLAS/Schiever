@@ -16,7 +16,7 @@
         { "month": "2025-12", "followers": 31000, "views": 1320000, "covering": 510000, "interactions": 2600, "ratio_interactions_followers": 8.39 },
         { "month": "2026-01", "followers": 31257, "views": 1442190, "covering": 357678, "interactions": 2291, "ratio_interactions_followers": 7.33 },
         { "month": "2026-02", "followers": 32372, "views": 1867531, "covering": 606799, "interactions": 2400, "ratio_interactions_followers": 7.41 },
-        { "month": "2026-03", "followers": 32800, "views": 938849, "covering": 395770, "interactions": 1217, "ratio_interactions_followers": 3.71 }
+        { "month": "2026-03", "followers": 33016, "views": 1604137, "covering": 574549, "interactions": 2030, "ratio_interactions_followers": 6.15 }
       ]
     },
     "instagram": {
@@ -35,7 +35,7 @@
         { "month": "2025-12", "followers": 550, "views": 88000, "covering": 34000, "interactions": 460, "ratio_interactions_followers": 83.64 },
         { "month": "2026-01", "followers": 613, "views": 220198, "covering": 77845, "interactions": 817, "ratio_interactions_followers": 133.28 },
         { "month": "2026-02", "followers": 746, "views": 313921, "covering": 145828, "interactions": 659, "ratio_interactions_followers": 88.34 },
-        { "month": "2026-03", "followers": 856, "views": 229736, "covering": 137934, "interactions": 295, "ratio_interactions_followers": 34.46 }
+        { "month": "2026-03", "followers": 908, "views": 349328, "covering": 195526, "interactions": 402, "ratio_interactions_followers": 44.27 }
       ]
     },
     "tiktok": {
@@ -54,7 +54,7 @@
         { "month": "2025-12", "followers": 880, "views": 135000, "covering": 84000, "interactions": 680, "ratio_interactions_followers": 77.27 },
         { "month": "2026-01", "followers": 1016, "views": 82000, "covering": 25000, "interactions": 818, "ratio_interactions_followers": 80.51 },
         { "month": "2026-02", "followers": 1382, "views": 436000, "covering": 215570, "interactions": 2075, "ratio_interactions_followers": 150.14 },
-        { "month": "2026-03", "followers": 1515, "views": 239000, "covering": 208216, "interactions": 1176, "ratio_interactions_followers": 77.62 }
+        { "month": "2026-03", "followers": 1593, "views": 430000, "covering": 222783, "interactions": 2190, "ratio_interactions_followers": 137.48 }
       ]
     }
   }

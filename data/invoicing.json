@@ -305,6 +305,36 @@
       "total_actual": 182211,
       "currency": "PLN",
       "status": "paid"
+    },
+    {
+      "month": "2026-01",
+      "line_items": [
+        { "description": "Budżet mediowy", "category": "digital", "budget": 35675, "actual": 35675 }
+      ],
+      "total_budget": 35675,
+      "total_actual": 35675,
+      "currency": "PLN",
+      "status": "paid"
+    },
+    {
+      "month": "2026-02",
+      "line_items": [
+        { "description": "Budżet mediowy", "category": "digital", "budget": 32000, "actual": 32000 }
+      ],
+      "total_budget": 32000,
+      "total_actual": 32000,
+      "currency": "PLN",
+      "status": "paid"
+    },
+    {
+      "month": "2026-03",
+      "line_items": [
+        { "description": "Budżet mediowy", "category": "digital", "budget": 35675, "actual": 35675 }
+      ],
+      "total_budget": 35675,
+      "total_actual": 35675,
+      "currency": "PLN",
+      "status": "pending"
     }
   ]
 }

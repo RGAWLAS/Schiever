@@ -65,9 +65,13 @@ export default function KpiPanel() {
 
   const allMonths = useMemo(() => {
     const s = new Set<string>();
-    kpiData.categories.forEach(c => c.kpis.forEach(k => Object.keys(k.targets).forEach(m => s.add(m))));
+    kpiData.categories.forEach(c => c.kpis.forEach(k => {
+      k.actuals.forEach(a => s.add(a.month));
+      Object.keys(k.targets).forEach(m => s.add(m));
+    }));
     return Array.from(s).sort();
   }, [kpiData]);
+
 
   const allKpis = useMemo(() => {
     const result: KpiRow[] = [];

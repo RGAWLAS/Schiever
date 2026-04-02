@@ -14,6 +14,6 @@
     { "month": "2025-12", "traffic": 30000, "conversion_rate": 2.30, "orders": 690, "retention_rate": 15.0, "ad_spend": 12000, "revenue": 110000 },
     { "month": "2026-01", "traffic": 21557, "conversion_rate": 3.31, "orders": 714, "retention_rate": 16.0, "ad_spend": 10000, "revenue": 95000 },
     { "month": "2026-02", "traffic": 16130, "conversion_rate": 4.25, "orders": 685, "retention_rate": 18.10, "ad_spend": 9500, "revenue": 88000 },
-    { "month": "2026-03", "traffic": 15841, "conversion_rate": 3.81, "orders": 604, "retention_rate": 14.50, "ad_spend": 9000, "revenue": 80000 }
+    { "month": "2026-03", "traffic": 23671, "conversion_rate": 3.15, "orders": 745, "retention_rate": 16.51, "ad_spend": 9000, "revenue": 80000 }
   ]
 }

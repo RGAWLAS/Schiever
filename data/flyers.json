@@ -14,6 +14,6 @@
     { "id": "flyer-2025-12", "month": "2025-12", "title": "Świąteczna Gazetka", "volume": 320000, "ctr": 2.5, "pages": 52, "products_featured": 380 },
     { "id": "flyer-2026-01", "month": "2026-01", "title": "Noworoczne Promocje", "volume": 250000, "ctr": 2.50, "pages": 28, "products_featured": 200 },
     { "id": "flyer-2026-02", "month": "2026-02", "title": "Zimowe Okazje", "volume": 255000, "ctr": 2.90, "pages": 28, "products_featured": 210 },
-    { "id": "flyer-2026-03", "month": "2026-03", "title": "Wiosna 2026", "volume": 265000, "ctr": 0.00, "pages": 32, "products_featured": 235 }
+    { "id": "flyer-2026-03", "month": "2026-03", "title": "Wiosna 2026", "volume": 265000, "ctr": 2.40, "pages": 32, "products_featured": 235 }
   ]
 }
