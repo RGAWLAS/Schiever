@@ -5,11 +5,11 @@ import { getKpiData, getSocialMediaData, getPaidMediaData, getFlyersData } from 
 import { formatNumber, formatMonth } from '@/lib/formatters';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-  BarChart, Bar, Cell,
+  BarChart, Bar, Cell, ReferenceLine,
 } from 'recharts';
-import { ShoppingCart, Newspaper, ChevronDown, ChevronRight } from 'lucide-react';
+import { ShoppingCart, Newspaper, ChevronDown, ChevronRight, ArrowLeft, TrendingUp } from 'lucide-react';
 import PdfExportButton from '@/components/ui/pdf-export-button';
-import TimeRangeFilter, { type TimeRangeValue, filterByTimeRange } from '@/components/ui/time-range-filter';
+import TimeRangeFilter, { type TimeRangeValue } from '@/components/ui/time-range-filter';
 import type { KpiMetric } from '@/types';
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -26,48 +26,29 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
 };
 
 function getActualValue(
-  kpiCategoryId: string,
-  metric: string,
-  month: string,
+  catId: string, metric: string, month: string,
   socialData: ReturnType<typeof getSocialMediaData>,
   paidData: ReturnType<typeof getPaidMediaData>,
   flyersData: ReturnType<typeof getFlyersData>,
 ): number | null {
-  if (kpiCategoryId === 'ecommerce') {
-    const entry = paidData.monthly.find(m => m.month === month);
-    if (!entry) return null;
+  if (catId === 'ecommerce') {
+    const e = paidData.monthly.find(m => m.month === month);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (entry as any)[metric] as number ?? null;
+    return e ? ((e as any)[metric] as number ?? null) : null;
   }
-
-  if (kpiCategoryId === 'social-facebook') {
-    const entry = socialData.platforms.facebook.monthly.find(m => m.month === month);
-    if (!entry) return null;
+  const pMap: Record<string, 'facebook' | 'instagram' | 'tiktok'> = {
+    'social-facebook': 'facebook', 'social-instagram': 'instagram', 'social-tiktok': 'tiktok',
+  };
+  if (pMap[catId]) {
+    const e = socialData.platforms[pMap[catId]].monthly.find(m => m.month === month);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (entry as any)[metric] as number ?? null;
+    return e ? ((e as any)[metric] as number ?? null) : null;
   }
-
-  if (kpiCategoryId === 'social-instagram') {
-    const entry = socialData.platforms.instagram.monthly.find(m => m.month === month);
-    if (!entry) return null;
+  if (catId === 'flyers') {
+    const e = flyersData.flyers.find(f => f.month === month);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (entry as any)[metric] as number ?? null;
+    return e ? ((e as any)[metric] as number ?? null) : null;
   }
-
-  if (kpiCategoryId === 'social-tiktok') {
-    const entry = socialData.platforms.tiktok.monthly.find(m => m.month === month);
-    if (!entry) return null;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (entry as any)[metric] as number ?? null;
-  }
-
-  if (kpiCategoryId === 'flyers') {
-    const entry = flyersData.flyers.find(f => f.month === month);
-    if (!entry) return null;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (entry as any)[metric] as number ?? null;
-  }
-
   return null;
 }
 
@@ -76,34 +57,32 @@ function formatValue(value: number, format: string, unit: string): string {
   return formatNumber(value);
 }
 
-function getStatusColor(ratio: number): string {
-  if (ratio >= 1.0) return 'bg-green-500';
-  if (ratio >= 0.9) return 'bg-green-400';
-  if (ratio >= 0.7) return 'bg-yellow-500';
-  return 'bg-red-500';
-}
-
-function getStatusBg(ratio: number): string {
-  if (ratio >= 0.9) return 'bg-green-100 text-green-700';
-  if (ratio >= 0.7) return 'bg-yellow-100 text-yellow-700';
-  return 'bg-red-100 text-red-700';
-}
-
-function getStatusLabel(ratio: number): string {
-  if (ratio >= 1.0) return 'Zrealizowany';
-  if (ratio >= 0.9) return 'Na dobrej drodze';
-  if (ratio >= 0.7) return 'Wymaga uwagi';
-  return 'Zagrożony';
-}
+function getStatusColor(r: number) { return r >= 1 ? 'bg-green-500' : r >= 0.9 ? 'bg-green-400' : r >= 0.7 ? 'bg-yellow-500' : 'bg-red-500'; }
+function getStatusBg(r: number) { return r >= 0.9 ? 'bg-green-100 text-green-700' : r >= 0.7 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'; }
+function getStatusLabel(r: number) { return r >= 1 ? 'Zrealizowany' : r >= 0.9 ? 'Na dobrej drodze' : r >= 0.7 ? 'Wymaga uwagi' : 'Zagrożony'; }
 
 interface KpiWithActuals {
   kpi: KpiMetric;
   categoryId: string;
+  categoryName: string;
   monthlyData: { month: string; target: number; actual: number | null }[];
   latestActual: number | null;
   latestTarget: number;
   latestMonth: string;
   ratio: number;
+}
+
+// Calculate simple linear regression trend
+function calculateTrend(data: { x: number; y: number }[]): { slope: number; intercept: number } {
+  const n = data.length;
+  if (n < 2) return { slope: 0, intercept: data[0]?.y ?? 0 };
+  const sumX = data.reduce((s, d) => s + d.x, 0);
+  const sumY = data.reduce((s, d) => s + d.y, 0);
+  const sumXY = data.reduce((s, d) => s + d.x * d.y, 0);
+  const sumX2 = data.reduce((s, d) => s + d.x * d.x, 0);
+  const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+  const intercept = (sumY - slope * sumX) / n;
+  return { slope, intercept };
 }
 
 export default function KpiPanel() {
@@ -115,43 +94,42 @@ export default function KpiPanel() {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set(kpiData.categories.map(c => c.id))
   );
-  const [selectedKpi, setSelectedKpi] = useState<KpiWithActuals | null>(null);
+  const [detailKpi, setDetailKpi] = useState<KpiWithActuals | null>(null);
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [timeRange, setTimeRange] = useState<TimeRangeValue>({ type: 'all' });
 
   const allMonths = useMemo(() => {
-    const monthSet = new Set<string>();
-    kpiData.categories.forEach(c => c.kpis.forEach(k => Object.keys(k.targets).forEach(m => monthSet.add(m))));
-    return Array.from(monthSet).sort();
+    const s = new Set<string>();
+    kpiData.categories.forEach(c => c.kpis.forEach(k => Object.keys(k.targets).forEach(m => s.add(m))));
+    return Array.from(s).sort();
   }, [kpiData]);
 
   const allKpisWithActuals = useMemo(() => {
     const result: KpiWithActuals[] = [];
-
     for (const category of kpiData.categories) {
       for (const kpi of category.kpis) {
-        const months = Object.keys(kpi.targets).sort();
-        const allMonthlyData = months.map(month => ({
+        let months = Object.keys(kpi.targets).sort();
+        // Apply time range filter
+        if (timeRange.type !== 'all') {
+          if (timeRange.type === 'custom' && timeRange.customFrom && timeRange.customTo) {
+            months = months.filter(m => m >= timeRange.customFrom! && m <= timeRange.customTo!);
+          } else {
+            const countMap: Record<string, number> = { 'last-1': 1, 'last-3': 3, 'last-6': 6, 'last-12': 12 };
+            const count = countMap[timeRange.type] || months.length;
+            months = months.slice(-count);
+          }
+        }
+        if (months.length === 0) continue;
+        const monthlyData = months.map(month => ({
           month,
           target: kpi.targets[month],
           actual: getActualValue(category.id, kpi.metric, month, socialData, paidData, flyersData),
         }));
-
-        const monthlyData = filterByTimeRange(allMonthlyData, timeRange);
-
-        if (monthlyData.length === 0) continue;
-
         const latest = monthlyData[monthlyData.length - 1];
-        const ratio = latest.actual !== null ? latest.actual / latest.target : 0;
-
+        const ratio = latest.actual !== null && latest.target > 0 ? latest.actual / latest.target : 0;
         result.push({
-          kpi,
-          categoryId: category.id,
-          monthlyData,
-          latestActual: latest.actual,
-          latestTarget: latest.target,
-          latestMonth: latest.month,
-          ratio,
+          kpi, categoryId: category.id, categoryName: category.name, monthlyData,
+          latestActual: latest.actual, latestTarget: latest.target, latestMonth: latest.month, ratio,
         });
       }
     }
@@ -160,48 +138,219 @@ export default function KpiPanel() {
 
   const toggleCategory = (id: string) => {
     const next = new Set(expandedCategories);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
+    if (next.has(id)) next.delete(id); else next.add(id);
     setExpandedCategories(next);
   };
 
-  // Overall stats
+  // Stats
   const totalKpis = allKpisWithActuals.length;
   const achieved = allKpisWithActuals.filter(k => k.ratio >= 1.0).length;
   const onTrack = allKpisWithActuals.filter(k => k.ratio >= 0.9 && k.ratio < 1.0).length;
   const atRisk = allKpisWithActuals.filter(k => k.ratio < 0.7).length;
-  const overallRatio = allKpisWithActuals.reduce((s, k) => s + Math.min(k.ratio, 1), 0) / totalKpis;
+  const overallRatio = totalKpis > 0 ? allKpisWithActuals.reduce((s, k) => s + Math.min(k.ratio, 1), 0) / totalKpis : 0;
 
   const filteredCategories = filterCategory === 'all'
     ? kpiData.categories
     : kpiData.categories.filter(c => c.id === filterCategory);
 
-  // Trend data for selected KPI — use current filtered data so it respects time range
-  const currentSelectedKpi = selectedKpi
-    ? allKpisWithActuals.find(k => k.kpi.id === selectedKpi.kpi.id) ?? selectedKpi
-    : null;
-  const trendData = currentSelectedKpi?.monthlyData.map(m => ({
-    month: formatMonth(m.month),
-    'Cel': m.target,
-    'Realizacja': m.actual ?? 0,
-  })) ?? [];
-
-  // Bar chart: latest month all KPIs
+  // BAR CHART
   const barData = allKpisWithActuals.map(k => ({
-    name: `${k.kpi.name}`,
+    name: k.kpi.name,
     ratio: Math.round(k.ratio * 100),
     categoryId: k.categoryId,
   }));
 
+  // ===== DETAIL VIEW =====
+  if (detailKpi) {
+    const dk = detailKpi;
+    const color = CATEGORY_COLORS[dk.categoryId] || '#1e40af';
+
+    // Weekly data
+    const weeklyData = dk.kpi.weekly?.filter(w => w.value > 0).map((w, i) => ({
+      period: w.period,
+      value: w.value,
+      index: i,
+    })) || [];
+
+    // Calculate trend line for weekly
+    const trendPoints = weeklyData.map((w, i) => ({ x: i, y: w.value }));
+    const trend = calculateTrend(trendPoints);
+    const weeklyWithTrend = weeklyData.map((w, i) => ({
+      ...w,
+      trend: parseFloat((trend.intercept + trend.slope * i).toFixed(2)),
+    }));
+
+    // Monthly actual values for trend line
+    const monthlyActuals = dk.monthlyData.filter(m => m.actual !== null && m.actual > 0);
+    const monthlyTrendPoints = monthlyActuals.map((m, i) => ({ x: i, y: m.actual! }));
+    const monthlyTrend = calculateTrend(monthlyTrendPoints);
+    const monthlyWithTrend = dk.monthlyData.map((m, i) => ({
+      month: formatMonth(m.month),
+      Cel: m.target,
+      Realizacja: m.actual ?? 0,
+      Trend: m.actual !== null ? parseFloat((monthlyTrend.intercept + monthlyTrend.slope * i).toFixed(2)) : 0,
+    }));
+
+    return (
+      <div className="space-y-6">
+        {/* Back button + header */}
+        <div className="flex items-center gap-3">
+          <button onClick={() => setDetailKpi(null)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <ArrowLeft size={20} />
+          </button>
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
+              <span className="text-sm text-muted">{dk.categoryName}</span>
+            </div>
+            <h2 className="text-xl font-bold">{dk.kpi.name}</h2>
+          </div>
+          <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusBg(dk.ratio)}`}>
+            {getStatusLabel(dk.ratio)} ({Math.round(dk.ratio * 100)}%)
+          </span>
+        </div>
+
+        {/* Summary cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="bg-white rounded-xl border border-border p-4 shadow-sm">
+            <div className="text-xs text-muted">Cel ({formatMonth(dk.latestMonth)})</div>
+            <div className="text-xl font-bold mt-1">{formatValue(dk.latestTarget, dk.kpi.format, dk.kpi.unit)}</div>
+          </div>
+          <div className="bg-white rounded-xl border border-border p-4 shadow-sm">
+            <div className="text-xs text-muted">Realizacja</div>
+            <div className="text-xl font-bold mt-1" style={{ color }}>
+              {dk.latestActual !== null ? formatValue(dk.latestActual, dk.kpi.format, dk.kpi.unit) : '—'}
+            </div>
+          </div>
+          <div className="bg-white rounded-xl border border-border p-4 shadow-sm">
+            <div className="text-xs text-muted">% realizacji</div>
+            <div className="text-xl font-bold mt-1">{Math.round(dk.ratio * 100)}%</div>
+            <div className="w-full bg-gray-100 rounded-full h-2 mt-2">
+              <div className={`h-full rounded-full ${getStatusColor(dk.ratio)}`} style={{ width: `${Math.min(dk.ratio * 100, 100)}%` }} />
+            </div>
+          </div>
+          <div className="bg-white rounded-xl border border-border p-4 shadow-sm">
+            <div className="text-xs text-muted flex items-center gap-1"><TrendingUp size={12} /> Trend tygodniowy</div>
+            <div className={`text-xl font-bold mt-1 ${trend.slope >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {trend.slope >= 0 ? '+' : ''}{dk.kpi.format === 'percent' ? trend.slope.toFixed(2) + '%' : formatNumber(Math.round(trend.slope))}/tydz.
+            </div>
+          </div>
+        </div>
+
+        {/* Monthly trend + trend line */}
+        <div className="bg-white rounded-xl border border-border p-6 shadow-sm">
+          <h3 className="text-lg font-semibold mb-1">Trend miesięczny: Cel vs. Realizacja</h3>
+          <p className="text-sm text-muted mb-4">Linia przerywana = linia trendu</p>
+          <ResponsiveContainer width="100%" height={320}>
+            <LineChart data={monthlyWithTrend}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="Cel" stroke="#94a3b8" strokeWidth={2} strokeDasharray="8 4" dot={false} />
+              <Line type="monotone" dataKey="Realizacja" stroke={color} strokeWidth={2.5} dot={{ r: 4, fill: color }} />
+              <Line type="monotone" dataKey="Trend" stroke={color} strokeWidth={1.5} strokeDasharray="4 4" dot={false} opacity={0.5} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Weekly breakdown chart */}
+        {weeklyWithTrend.length > 0 && (
+          <div className="bg-white rounded-xl border border-border p-6 shadow-sm">
+            <h3 className="text-lg font-semibold mb-1">Dane tygodniowe</h3>
+            <p className="text-sm text-muted mb-4">Linia = linia trendu</p>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={weeklyWithTrend}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis dataKey="period" tick={{ fontSize: 10 }} />
+                <YAxis tick={{ fontSize: 11 }} />
+                <Tooltip formatter={(v) => dk.kpi.format === 'percent' ? `${v}%` : formatNumber(Number(v))} />
+                <Bar dataKey="value" fill={color} radius={[4, 4, 0, 0]} opacity={0.8} name="Wartość" />
+                <Line type="monotone" dataKey="trend" stroke="#dc2626" strokeWidth={2} dot={false} name="Trend" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {/* Monthly data table */}
+        <div className="bg-white rounded-xl border border-border p-6 shadow-sm overflow-x-auto">
+          <h3 className="text-lg font-semibold mb-4">Szczegółowe dane miesięczne</h3>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="text-left py-2 px-3 text-muted font-medium">Miesiąc</th>
+                <th className="text-right py-2 px-3 text-muted font-medium">Cel</th>
+                <th className="text-right py-2 px-3 text-muted font-medium">Realizacja</th>
+                <th className="text-right py-2 px-3 text-muted font-medium">%</th>
+                <th className="text-center py-2 px-3 text-muted font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dk.monthlyData.map(m => {
+                const r = m.actual !== null && m.target > 0 ? m.actual / m.target : 0;
+                return (
+                  <tr key={m.month} className="border-b border-gray-50 hover:bg-gray-50">
+                    <td className="py-2 px-3 font-medium">{formatMonth(m.month)}</td>
+                    <td className="py-2 px-3 text-right">{formatValue(m.target, dk.kpi.format, dk.kpi.unit)}</td>
+                    <td className="py-2 px-3 text-right font-medium" style={{ color: m.actual ? color : undefined }}>
+                      {m.actual !== null ? formatValue(m.actual, dk.kpi.format, dk.kpi.unit) : '—'}
+                    </td>
+                    <td className="py-2 px-3 text-right">{m.actual !== null ? `${Math.round(r * 100)}%` : '—'}</td>
+                    <td className="py-2 px-3 text-center">
+                      {m.actual !== null ? (
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${getStatusBg(r)}`}>
+                          {getStatusLabel(r)}
+                        </span>
+                      ) : <span className="text-muted text-xs">brak danych</span>}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Weekly data table */}
+        {dk.kpi.weekly && dk.kpi.weekly.length > 0 && (
+          <div className="bg-white rounded-xl border border-border p-6 shadow-sm overflow-x-auto">
+            <h3 className="text-lg font-semibold mb-4">Rozkład tygodniowy</h3>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left py-2 px-3 text-muted font-medium">Okres</th>
+                  <th className="text-right py-2 px-3 text-muted font-medium">Wartość</th>
+                  <th className="text-right py-2 px-3 text-muted font-medium">Trend</th>
+                </tr>
+              </thead>
+              <tbody>
+                {weeklyWithTrend.map((w, i) => (
+                  <tr key={i} className="border-b border-gray-50">
+                    <td className="py-2 px-3">{w.period}</td>
+                    <td className="py-2 px-3 text-right font-medium">
+                      {dk.kpi.format === 'percent' ? `${w.value}%` : formatNumber(w.value)}
+                    </td>
+                    <td className="py-2 px-3 text-right text-muted">
+                      {dk.kpi.format === 'percent' ? `${w.trend}%` : formatNumber(Math.round(w.trend))}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ===== LIST VIEW =====
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Realizacja KPI</h2>
         <PdfExportButton section="kpi" size="sm" />
       </div>
 
-      {/* Time range filter */}
       <TimeRangeFilter value={timeRange} onChange={setTimeRange} availableMonths={allMonths} />
 
       {/* Overall summary */}
@@ -234,22 +383,11 @@ export default function KpiPanel() {
       {/* Category filter */}
       <div className="flex items-center gap-2 flex-wrap">
         <span className="text-sm text-muted font-medium">Kategoria:</span>
-        <button
-          onClick={() => setFilterCategory('all')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-            filterCategory === 'all' ? 'bg-primary text-white' : 'bg-white border border-border hover:bg-gray-50'
-          }`}
-        >
+        <button onClick={() => setFilterCategory('all')} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${filterCategory === 'all' ? 'bg-primary text-white' : 'bg-white border border-border hover:bg-gray-50'}`}>
           Wszystkie
         </button>
         {kpiData.categories.map(cat => (
-          <button
-            key={cat.id}
-            onClick={() => setFilterCategory(cat.id)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 ${
-              filterCategory === cat.id ? 'bg-primary text-white' : 'bg-white border border-border hover:bg-gray-50'
-            }`}
-          >
+          <button key={cat.id} onClick={() => setFilterCategory(cat.id)} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 ${filterCategory === cat.id ? 'bg-primary text-white' : 'bg-white border border-border hover:bg-gray-50'}`}>
             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: CATEGORY_COLORS[cat.id] || '#6b7280' }} />
             {cat.name}
           </button>
@@ -260,21 +398,17 @@ export default function KpiPanel() {
       {filteredCategories.map(category => {
         const isExpanded = expandedCategories.has(category.id);
         const categoryKpis = allKpisWithActuals.filter(k => k.categoryId === category.id);
+        if (categoryKpis.length === 0) return null;
         const catAchieved = categoryKpis.filter(k => k.ratio >= 0.9).length;
         const catColor = CATEGORY_COLORS[category.id] || '#6b7280';
         const CatIcon = CATEGORY_ICONS[category.id];
 
         return (
           <div key={category.id} className="bg-white rounded-xl border border-border shadow-sm overflow-hidden">
-            {/* Category header */}
-            <button
-              onClick={() => toggleCategory(category.id)}
-              className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors"
-            >
+            <button onClick={() => toggleCategory(category.id)} className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${catColor}15` }}>
-                  {CatIcon ? <CatIcon size={16} style={{ color: catColor }} /> :
-                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: catColor }} />}
+                  {CatIcon ? <CatIcon size={16} style={{ color: catColor }} /> : <span className="w-3 h-3 rounded-full" style={{ backgroundColor: catColor }} />}
                 </div>
                 <div className="text-left">
                   <h3 className="font-semibold text-sm">{category.name}</h3>
@@ -282,55 +416,38 @@ export default function KpiPanel() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="flex gap-1">
-                  {categoryKpis.map(k => (
-                    <div key={k.kpi.id} className={`w-2.5 h-2.5 rounded-full ${getStatusColor(k.ratio)}`} title={k.kpi.name} />
-                  ))}
-                </div>
+                <div className="flex gap-1">{categoryKpis.map(k => <div key={k.kpi.id} className={`w-2.5 h-2.5 rounded-full ${getStatusColor(k.ratio)}`} />)}</div>
                 {isExpanded ? <ChevronDown size={18} className="text-muted" /> : <ChevronRight size={18} className="text-muted" />}
               </div>
             </button>
 
-            {/* KPI cards */}
             {isExpanded && (
               <div className="border-t border-border">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0 divide-x divide-y divide-border">
                   {categoryKpis.map(k => {
                     const percent = Math.min(k.ratio * 100, 100);
-                    const isSelected = selectedKpi?.kpi.id === k.kpi.id;
-
                     return (
-                      <button
-                        key={k.kpi.id}
-                        onClick={() => setSelectedKpi(k)}
-                        className={`p-4 text-left hover:bg-blue-50/50 transition-colors ${isSelected ? 'bg-blue-50' : ''}`}
-                      >
+                      <button key={k.kpi.id} onClick={() => setDetailKpi(k)} className="p-4 text-left hover:bg-blue-50/50 transition-colors group">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium">{k.kpi.name}</span>
+                          <span className="text-sm font-medium group-hover:text-primary transition-colors">{k.kpi.name}</span>
                           <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${getStatusBg(k.ratio)}`}>
                             {Math.round(percent)}%
                           </span>
                         </div>
                         <div className="flex items-end justify-between mb-2">
                           <div>
-                            <div className="text-xl font-bold">
-                              {k.latestActual !== null ? formatValue(k.latestActual, k.kpi.format, k.kpi.unit) : '—'}
-                            </div>
+                            <div className="text-xl font-bold">{k.latestActual !== null ? formatValue(k.latestActual, k.kpi.format, k.kpi.unit) : '—'}</div>
                             <div className="text-[10px] text-muted">Realizacja ({formatMonth(k.latestMonth)})</div>
                           </div>
                           <div className="text-right">
-                            <div className="text-sm text-muted font-medium">
-                              {formatValue(k.latestTarget, k.kpi.format, k.kpi.unit)}
-                            </div>
+                            <div className="text-sm text-muted font-medium">{formatValue(k.latestTarget, k.kpi.format, k.kpi.unit)}</div>
                             <div className="text-[10px] text-muted">Cel</div>
                           </div>
                         </div>
                         <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-                          <div
-                            className={`h-full rounded-full ${getStatusColor(k.ratio)} transition-all`}
-                            style={{ width: `${percent}%` }}
-                          />
+                          <div className={`h-full rounded-full ${getStatusColor(k.ratio)} transition-all`} style={{ width: `${percent}%` }} />
                         </div>
+                        <div className="text-[10px] text-primary mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity">Kliknij aby zobaczyć szczegóły →</div>
                       </button>
                     );
                   })}
@@ -341,33 +458,7 @@ export default function KpiPanel() {
         );
       })}
 
-      {/* Selected KPI trend chart */}
-      {currentSelectedKpi && (
-        <div className="bg-white rounded-xl border border-border p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-1">
-            <h3 className="text-lg font-semibold">{currentSelectedKpi.kpi.name}</h3>
-            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${getStatusBg(currentSelectedKpi.ratio)}`}>
-              {getStatusLabel(currentSelectedKpi.ratio)}
-            </span>
-          </div>
-          <p className="text-sm text-muted mb-4">
-            {kpiData.categories.find(c => c.id === currentSelectedKpi.categoryId)?.name} — Trend: cel vs. realizacja
-          </p>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={trendData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="Cel" stroke="#94a3b8" strokeWidth={2} strokeDasharray="5 5" dot={false} />
-              <Line type="monotone" dataKey="Realizacja" stroke={CATEGORY_COLORS[currentSelectedKpi.categoryId] || '#1e40af'} strokeWidth={2} dot={{ r: 3 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-
-      {/* All KPIs bar chart */}
+      {/* Bar chart overview */}
       <div className="bg-white rounded-xl border border-border p-6 shadow-sm">
         <h3 className="text-lg font-semibold mb-4">Realizacja KPI — przegląd (%)</h3>
         <ResponsiveContainer width="100%" height={Math.max(300, barData.length * 32)}>
@@ -376,12 +467,10 @@ export default function KpiPanel() {
             <XAxis type="number" domain={[0, 120]} tick={{ fontSize: 11 }} unit="%" />
             <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={155} />
             <Tooltip formatter={(value) => `${value}%`} />
+            <ReferenceLine x={100} stroke="#059669" strokeDasharray="3 3" strokeWidth={2} />
             <Bar dataKey="ratio" radius={[0, 4, 4, 0]} barSize={20}>
               {barData.map((entry, i) => (
-                <Cell
-                  key={i}
-                  fill={entry.ratio >= 100 ? '#059669' : entry.ratio >= 90 ? '#22c55e' : entry.ratio >= 70 ? '#f59e0b' : '#dc2626'}
-                />
+                <Cell key={i} fill={entry.ratio >= 100 ? '#059669' : entry.ratio >= 90 ? '#22c55e' : entry.ratio >= 70 ? '#f59e0b' : '#dc2626'} />
               ))}
             </Bar>
           </BarChart>
@@ -400,34 +489,32 @@ export default function KpiPanel() {
               <th className="text-right py-2 px-3 text-muted font-medium">Realizacja</th>
               <th className="text-right py-2 px-3 text-muted font-medium">%</th>
               <th className="text-center py-2 px-3 text-muted font-medium">Status</th>
+              <th className="text-center py-2 px-3 text-muted font-medium"></th>
             </tr>
           </thead>
           <tbody>
             {kpiData.categories.map(category => {
-              const categoryKpisFiltered = allKpisWithActuals.filter(k => k.categoryId === category.id);
-              return categoryKpisFiltered.map((k, i) => (
-                  <tr key={k.kpi.id} className="border-b border-gray-50 hover:bg-gray-50">
-                    {i === 0 && (
-                      <td className="py-2 px-3 font-medium align-top" rowSpan={categoryKpisFiltered.length}>
-                        <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: CATEGORY_COLORS[category.id] }} />
-                          {category.name}
-                        </div>
-                      </td>
-                    )}
-                    <td className="py-2 px-3">{k.kpi.name}</td>
-                    <td className="py-2 px-3 text-right">{formatValue(k.latestTarget, k.kpi.format, k.kpi.unit)}</td>
-                    <td className="py-2 px-3 text-right font-medium">
-                      {k.latestActual !== null ? formatValue(k.latestActual, k.kpi.format, k.kpi.unit) : '—'}
+              const catKpis = allKpisWithActuals.filter(k => k.categoryId === category.id);
+              return catKpis.map((k, i) => (
+                <tr key={k.kpi.id} className="border-b border-gray-50 hover:bg-gray-50 cursor-pointer" onClick={() => setDetailKpi(k)}>
+                  {i === 0 && (
+                    <td className="py-2 px-3 font-medium align-top" rowSpan={catKpis.length}>
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: CATEGORY_COLORS[category.id] }} />
+                        {category.name}
+                      </div>
                     </td>
-                    <td className="py-2 px-3 text-right">{Math.round(k.ratio * 100)}%</td>
-                    <td className="py-2 px-3 text-center">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${getStatusBg(k.ratio)}`}>
-                        {getStatusLabel(k.ratio)}
-                      </span>
-                    </td>
-                  </tr>
-                ));
+                  )}
+                  <td className="py-2 px-3">{k.kpi.name}</td>
+                  <td className="py-2 px-3 text-right">{formatValue(k.latestTarget, k.kpi.format, k.kpi.unit)}</td>
+                  <td className="py-2 px-3 text-right font-medium">{k.latestActual !== null ? formatValue(k.latestActual, k.kpi.format, k.kpi.unit) : '—'}</td>
+                  <td className="py-2 px-3 text-right">{Math.round(k.ratio * 100)}%</td>
+                  <td className="py-2 px-3 text-center">
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${getStatusBg(k.ratio)}`}>{getStatusLabel(k.ratio)}</span>
+                  </td>
+                  <td className="py-2 px-3 text-center text-primary text-xs">Szczegóły →</td>
+                </tr>
+              ));
             })}
           </tbody>
         </table>
