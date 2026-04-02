@@ -63,11 +63,17 @@ export default function KpiPanel() {
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [timeRange, setTimeRange] = useState<TimeRangeValue>({ type: 'all' });
 
+  // Reset detail view when filter changes
+  const handleTimeRangeChange = (val: TimeRangeValue) => {
+    setTimeRange(val);
+    setDetailKpi(null);
+  };
+
+  // Only months with actual data for filtering
   const allMonths = useMemo(() => {
     const s = new Set<string>();
     kpiData.categories.forEach(c => c.kpis.forEach(k => {
       k.actuals.forEach(a => s.add(a.month));
-      Object.keys(k.targets).forEach(m => s.add(m));
     }));
     return Array.from(s).sort();
   }, [kpiData]);
@@ -110,20 +116,6 @@ export default function KpiPanel() {
   const achieved = allKpis.filter(k => k.ratio >= 1.0).length;
   const onTrack = allKpis.filter(k => k.ratio >= 0.9 && k.ratio < 1.0).length;
   const atRisk = allKpis.filter(k => k.ratio < 0.7).length;
-  // Use overall monthly realization from xlsx if available, otherwise compute
-  const overallPct = (() => {
-    if (kpiData.overall_monthly_realization) {
-      const months = Object.keys(kpiData.overall_monthly_realization).sort();
-      // Get latest month that matches current filter
-      const filteredMonths = allKpis.length > 0 ? Array.from(new Set(allKpis.map(k => k.latestMonth))) : months;
-      const latestMonth = filteredMonths.sort().pop();
-      if (latestMonth && kpiData.overall_monthly_realization[latestMonth] !== undefined) {
-        return kpiData.overall_monthly_realization[latestMonth];
-      }
-    }
-    return totalKpis > 0 ? allKpis.reduce((s, k) => s + k.ratio * 100, 0) / totalKpis : 0;
-  })();
-
   const filteredCats = filterCategory === 'all' ? kpiData.categories : kpiData.categories.filter(c => c.id === filterCategory);
 
   const barData = allKpis.map(k => ({ name: k.kpi.name, ratio: parseFloat((k.ratio * 100).toFixed(2)), categoryId: k.categoryId }));
@@ -303,16 +295,31 @@ export default function KpiPanel() {
         <h2 className="text-lg font-semibold">Realizacja KPI</h2>
         <PdfExportButton section="kpi" size="sm" />
       </div>
-      <TimeRangeFilter value={timeRange} onChange={setTimeRange} availableMonths={allMonths} />
+      <TimeRangeFilter value={timeRange} onChange={handleTimeRangeChange} availableMonths={allMonths} />
 
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-        <div className="bg-white rounded-xl border border-border p-4 shadow-sm">
-          <div className="text-xs text-muted">Ogólna realizacja</div>
-          <div className="text-2xl font-bold text-primary mt-1">{overallPct.toFixed(2)}%</div>
-          <div className="w-full bg-gray-100 rounded-full h-2 mt-2 overflow-hidden">
-            <div className="h-full rounded-full bg-gradient-to-r from-primary to-accent" style={{ width: `${overallPct.toFixed(2)}%` }} />
-          </div>
+      {/* Overall monthly realization cards */}
+      {kpiData.overall_monthly_realization && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {Object.entries(kpiData.overall_monthly_realization).sort(([a],[b]) => a.localeCompare(b)).map(([month, pct]) => {
+            const isActive = allKpis.some(k => k.latestMonth === month);
+            const isLatest = allKpis.length > 0 && allKpis[0]?.latestMonth === month;
+            return (
+              <div key={month} className={`bg-white rounded-xl border p-4 shadow-sm ${isActive ? 'border-primary' : 'border-border opacity-50'}`}>
+                <div className="text-xs text-muted">{formatMonth(month)}</div>
+                <div className={`text-2xl font-bold mt-1 ${pct >= 100 ? 'text-green-600' : pct >= 90 ? 'text-yellow-600' : 'text-red-600'}`}>
+                  {pct.toFixed(2)}%
+                </div>
+                <div className="w-full bg-gray-100 rounded-full h-2 mt-2 overflow-hidden">
+                  <div className={`h-full rounded-full ${pct >= 100 ? 'bg-green-500' : pct >= 90 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{ width: `${Math.min(pct, 100)}%` }} />
+                </div>
+                {isLatest && <div className="text-[10px] text-primary mt-1">aktualny okres</div>}
+              </div>
+            );
+          })}
         </div>
+      )}
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="bg-white rounded-xl border border-border p-4 shadow-sm"><div className="text-xs text-muted">Łącznie KPI</div><div className="text-2xl font-bold mt-1">{totalKpis}</div></div>
         <div className="bg-white rounded-xl border border-border p-4 shadow-sm"><div className="text-xs text-muted">Zrealizowane</div><div className="text-2xl font-bold text-green-600 mt-1">{achieved}</div></div>
         <div className="bg-white rounded-xl border border-border p-4 shadow-sm"><div className="text-xs text-muted">Na dobrej drodze</div><div className="text-2xl font-bold text-green-500 mt-1">{onTrack}</div></div>
