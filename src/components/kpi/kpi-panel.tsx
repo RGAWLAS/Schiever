@@ -90,7 +90,7 @@ export default function KpiPanel() {
         }
         const latest = actuals[actuals.length - 1];
         if (!latest) continue;
-        const ratio = latest.actual !== null && latest.target > 0 ? latest.actual / latest.target : 0;
+        const ratio = latest.realization_pct !== null ? latest.realization_pct / 100 : 0;
         result.push({
           kpi, categoryId: cat.id, categoryName: cat.name, actuals,
           latestActual: latest.actual, latestTarget: latest.target, latestMonth: latest.month, ratio,
@@ -110,11 +110,23 @@ export default function KpiPanel() {
   const achieved = allKpis.filter(k => k.ratio >= 1.0).length;
   const onTrack = allKpis.filter(k => k.ratio >= 0.9 && k.ratio < 1.0).length;
   const atRisk = allKpis.filter(k => k.ratio < 0.7).length;
-  const overallRatio = totalKpis > 0 ? allKpis.reduce((s, k) => s + Math.min(k.ratio, 1), 0) / totalKpis : 0;
+  // Use overall monthly realization from xlsx if available, otherwise compute
+  const overallPct = (() => {
+    if (kpiData.overall_monthly_realization) {
+      const months = Object.keys(kpiData.overall_monthly_realization).sort();
+      // Get latest month that matches current filter
+      const filteredMonths = allKpis.length > 0 ? Array.from(new Set(allKpis.map(k => k.latestMonth))) : months;
+      const latestMonth = filteredMonths.sort().pop();
+      if (latestMonth && kpiData.overall_monthly_realization[latestMonth] !== undefined) {
+        return kpiData.overall_monthly_realization[latestMonth];
+      }
+    }
+    return totalKpis > 0 ? allKpis.reduce((s, k) => s + k.ratio * 100, 0) / totalKpis : 0;
+  })();
 
   const filteredCats = filterCategory === 'all' ? kpiData.categories : kpiData.categories.filter(c => c.id === filterCategory);
 
-  const barData = allKpis.map(k => ({ name: k.kpi.name, ratio: Math.round(k.ratio * 100), categoryId: k.categoryId }));
+  const barData = allKpis.map(k => ({ name: k.kpi.name, ratio: parseFloat((k.ratio * 100).toFixed(2)), categoryId: k.categoryId }));
 
   // ===== DETAIL VIEW =====
   if (detailKpi) {
@@ -155,7 +167,7 @@ export default function KpiPanel() {
             <h2 className="text-xl font-bold">{dk.kpi.name}</h2>
           </div>
           <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusBg(dk.ratio)}`}>
-            {getStatusLabel(dk.ratio)} ({Math.round(dk.ratio * 100)}%)
+            {getStatusLabel(dk.ratio)} ({(dk.ratio * 100).toFixed(2)}%)
           </span>
         </div>
 
@@ -173,7 +185,7 @@ export default function KpiPanel() {
           </div>
           <div className="bg-white rounded-xl border border-border p-4 shadow-sm">
             <div className="text-xs text-muted">% realizacji</div>
-            <div className="text-xl font-bold mt-1">{Math.round(dk.ratio * 100)}%</div>
+            <div className="text-xl font-bold mt-1">{(dk.ratio * 100).toFixed(2)}%</div>
             <div className="w-full bg-gray-100 rounded-full h-2 mt-2">
               <div className={`h-full rounded-full ${getStatusColor(dk.ratio)}`} style={{ width: `${Math.min(dk.ratio * 100, 100)}%` }} />
             </div>
@@ -237,7 +249,7 @@ export default function KpiPanel() {
             </thead>
             <tbody>
               {dk.actuals.map(a => {
-                const r = a.actual !== null && a.target > 0 ? a.actual / a.target : 0;
+                const r = a.realization_pct !== null ? a.realization_pct / 100 : 0;
                 return (
                   <tr key={a.month} className="border-b border-gray-50 hover:bg-gray-50">
                     <td className="py-2 px-3 font-medium">{formatMonth(a.month)}</td>
@@ -245,7 +257,7 @@ export default function KpiPanel() {
                     <td className="py-2 px-3 text-right font-medium" style={{ color: a.actual !== null ? color : undefined }}>
                       {a.actual !== null ? fv(a.actual, dk.kpi.format, dk.kpi.unit) : '—'}
                     </td>
-                    <td className="py-2 px-3 text-right">{a.realization_pct !== null ? `${a.realization_pct}%` : '—'}</td>
+                    <td className="py-2 px-3 text-right">{a.realization_pct !== null ? `${a.realization_pct.toFixed(2)}%` : '—'}</td>
                     <td className="py-2 px-3 text-center">
                       {a.actual !== null ? <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${getStatusBg(r)}`}>{getStatusLabel(r)}</span> : <span className="text-muted text-xs">brak</span>}
                     </td>
@@ -296,9 +308,9 @@ export default function KpiPanel() {
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         <div className="bg-white rounded-xl border border-border p-4 shadow-sm">
           <div className="text-xs text-muted">Ogólna realizacja</div>
-          <div className="text-2xl font-bold text-primary mt-1">{Math.round(overallRatio * 100)}%</div>
+          <div className="text-2xl font-bold text-primary mt-1">{overallPct.toFixed(2)}%</div>
           <div className="w-full bg-gray-100 rounded-full h-2 mt-2 overflow-hidden">
-            <div className="h-full rounded-full bg-gradient-to-r from-primary to-accent" style={{ width: `${Math.round(overallRatio * 100)}%` }} />
+            <div className="h-full rounded-full bg-gradient-to-r from-primary to-accent" style={{ width: `${overallPct.toFixed(2)}%` }} />
           </div>
         </div>
         <div className="bg-white rounded-xl border border-border p-4 shadow-sm"><div className="text-xs text-muted">Łącznie KPI</div><div className="text-2xl font-bold mt-1">{totalKpis}</div></div>
@@ -350,7 +362,7 @@ export default function KpiPanel() {
                     <button key={k.kpi.id} onClick={() => setDetailKpi(k)} className="p-4 text-left hover:bg-blue-50/50 group">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-medium group-hover:text-primary">{k.kpi.name}</span>
-                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${getStatusBg(k.ratio)}`}>{Math.round(pct)}%</span>
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${getStatusBg(k.ratio)}`}>{pct.toFixed(2)}%</span>
                       </div>
                       <div className="flex items-end justify-between mb-2">
                         <div>
@@ -414,7 +426,7 @@ export default function KpiPanel() {
                   <td className="py-2 px-3">{k.kpi.name}</td>
                   <td className="py-2 px-3 text-right">{fv(k.latestTarget, k.kpi.format, k.kpi.unit)}</td>
                   <td className="py-2 px-3 text-right font-medium">{k.latestActual !== null ? fv(k.latestActual, k.kpi.format, k.kpi.unit) : '—'}</td>
-                  <td className="py-2 px-3 text-right">{Math.round(k.ratio * 100)}%</td>
+                  <td className="py-2 px-3 text-right">{(k.ratio * 100).toFixed(2)}%</td>
                   <td className="py-2 px-3 text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${getStatusBg(k.ratio)}`}>{getStatusLabel(k.ratio)}</span></td>
                   <td className="py-2 px-3 text-center text-primary text-xs">Szczegóły →</td>
                 </tr>

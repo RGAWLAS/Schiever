@@ -106,4 +106,5 @@ export interface KpiCategory {
 
 export interface KpiData {
   categories: KpiCategory[];
+  overall_monthly_realization?: Record<string, number>;
 }
