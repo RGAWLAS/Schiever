@@ -1,19 +1,19 @@
 {
   "monthly": [
-    { "month": "2025-01", "traffic": 22000, "conversion_rate": 1.80, "orders": 396, "retention_rate": 12.0, "ad_spend": 8000, "revenue": 62000 },
-    { "month": "2025-02", "traffic": 23000, "conversion_rate": 1.85, "orders": 426, "retention_rate": 12.5, "ad_spend": 8500, "revenue": 68000 },
-    { "month": "2025-03", "traffic": 24500, "conversion_rate": 1.90, "orders": 466, "retention_rate": 12.8, "ad_spend": 9000, "revenue": 74000 },
-    { "month": "2025-04", "traffic": 23500, "conversion_rate": 1.85, "orders": 435, "retention_rate": 13.0, "ad_spend": 8500, "revenue": 70000 },
-    { "month": "2025-05", "traffic": 25000, "conversion_rate": 1.95, "orders": 488, "retention_rate": 13.2, "ad_spend": 9200, "revenue": 78000 },
-    { "month": "2025-06", "traffic": 24000, "conversion_rate": 1.90, "orders": 456, "retention_rate": 13.5, "ad_spend": 8800, "revenue": 73000 },
-    { "month": "2025-07", "traffic": 22500, "conversion_rate": 1.80, "orders": 405, "retention_rate": 13.0, "ad_spend": 8000, "revenue": 65000 },
-    { "month": "2025-08", "traffic": 21500, "conversion_rate": 1.75, "orders": 376, "retention_rate": 12.8, "ad_spend": 7500, "revenue": 60000 },
-    { "month": "2025-09", "traffic": 26000, "conversion_rate": 2.00, "orders": 520, "retention_rate": 13.8, "ad_spend": 9500, "revenue": 82000 },
-    { "month": "2025-10", "traffic": 27500, "conversion_rate": 2.10, "orders": 578, "retention_rate": 14.0, "ad_spend": 10000, "revenue": 90000 },
-    { "month": "2025-11", "traffic": 29000, "conversion_rate": 2.20, "orders": 638, "retention_rate": 14.5, "ad_spend": 11000, "revenue": 102000 },
-    { "month": "2025-12", "traffic": 30000, "conversion_rate": 2.30, "orders": 690, "retention_rate": 15.0, "ad_spend": 12000, "revenue": 110000 },
-    { "month": "2026-01", "traffic": 21557, "conversion_rate": 3.31, "orders": 714, "retention_rate": 16.0, "ad_spend": 10000, "revenue": 95000 },
-    { "month": "2026-02", "traffic": 16130, "conversion_rate": 4.25, "orders": 685, "retention_rate": 18.10, "ad_spend": 9500, "revenue": 88000 },
-    { "month": "2026-03", "traffic": 23671, "conversion_rate": 3.15, "orders": 745, "retention_rate": 16.51, "ad_spend": 9000, "revenue": 80000 }
+    { "month": "2025-01", "traffic": 8963, "conversion_rate": 0.00, "orders": 0, "retention_rate": 0, "ad_spend": 16000, "revenue": 0 },
+    { "month": "2025-02", "traffic": 7871, "conversion_rate": 0.25, "orders": 20, "retention_rate": 0, "ad_spend": 18600, "revenue": 3200 },
+    { "month": "2025-03", "traffic": 5916, "conversion_rate": 2.60, "orders": 154, "retention_rate": 0, "ad_spend": 17800, "revenue": 24600 },
+    { "month": "2025-04", "traffic": 3362, "conversion_rate": 5.65, "orders": 190, "retention_rate": 0, "ad_spend": 17452, "revenue": 30400 },
+    { "month": "2025-05", "traffic": 3343, "conversion_rate": 4.88, "orders": 163, "retention_rate": 0, "ad_spend": 19000, "revenue": 26100 },
+    { "month": "2025-06", "traffic": 2982, "conversion_rate": 4.66, "orders": 139, "retention_rate": 0, "ad_spend": 19331, "revenue": 22200 },
+    { "month": "2025-07", "traffic": 13731, "conversion_rate": 1.51, "orders": 208, "retention_rate": 0, "ad_spend": 20950, "revenue": 33300 },
+    { "month": "2025-08", "traffic": 14878, "conversion_rate": 1.39, "orders": 207, "retention_rate": 0, "ad_spend": 20950, "revenue": 33100 },
+    { "month": "2025-09", "traffic": 12734, "conversion_rate": 1.96, "orders": 249, "retention_rate": 0, "ad_spend": 16950, "revenue": 39800 },
+    { "month": "2025-10", "traffic": 14551, "conversion_rate": 2.38, "orders": 346, "retention_rate": 0, "ad_spend": 16950, "revenue": 55400 },
+    { "month": "2025-11", "traffic": 19206, "conversion_rate": 1.75, "orders": 336, "retention_rate": 0, "ad_spend": 28223, "revenue": 53800 },
+    { "month": "2025-12", "traffic": 23241, "conversion_rate": 1.70, "orders": 396, "retention_rate": 0, "ad_spend": 27600, "revenue": 63400 },
+    { "month": "2026-01", "traffic": 21557, "conversion_rate": 3.31, "orders": 714, "retention_rate": 16.0, "ad_spend": 35675, "revenue": 0 },
+    { "month": "2026-02", "traffic": 16130, "conversion_rate": 4.14, "orders": 667, "retention_rate": 18.10, "ad_spend": 32000, "revenue": 0 },
+    { "month": "2026-03", "traffic": 23671, "conversion_rate": 3.15, "orders": 745, "retention_rate": 16.51, "ad_spend": 35675, "revenue": 0 }
   ]
 }
