@@ -364,12 +364,13 @@ export default function KpiPanel() {
             {isExp && (
               <div className="border-t border-border grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-x divide-y divide-border">
                 {catKpis.map(k => {
-                  const pct = Math.min(k.ratio * 100, 100);
+                  const pctDisplay = (k.ratio * 100).toFixed(2);
+                  const pctBar = Math.min(k.ratio * 100, 100);
                   return (
                     <button key={k.kpi.id} onClick={() => setDetailKpi(k)} className="p-4 text-left hover:bg-blue-50/50 group">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-medium group-hover:text-primary">{k.kpi.name}</span>
-                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${getStatusBg(k.ratio)}`}>{pct.toFixed(2)}%</span>
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${getStatusBg(k.ratio)}`}>{pctDisplay}%</span>
                       </div>
                       <div className="flex items-end justify-between mb-2">
                         <div>
@@ -382,7 +383,7 @@ export default function KpiPanel() {
                         </div>
                       </div>
                       <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-                        <div className={`h-full rounded-full ${getStatusColor(k.ratio)}`} style={{ width: `${pct}%` }} />
+                        <div className={`h-full rounded-full ${getStatusColor(k.ratio)}`} style={{ width: `${pctBar}%` }} />
                       </div>
                       <div className="text-[10px] text-primary mt-1.5 opacity-0 group-hover:opacity-100">Szczegóły →</div>
                     </button>
